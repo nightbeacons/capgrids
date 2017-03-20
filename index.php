@@ -1,18 +1,19 @@
 <?php
 include_once("includes/gridFunctions.php");
 
-$default_sectional = ourSectional();
+//$default_sectional = ourSectional();
+$default_sectional = "SEATTLE";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="en-us">
-<title>Paine Field Squadron, Civil Air Patrol: Gridmaster</title>
+<title>Gridmaster | Civil Air Patrol Emergency Services</title>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
-<link rel="icon" type="image/png" href="/images/logo32.png">
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
 <meta name="description" 
-	content="Paine Field Squadron, Washington Wing, Civil Air Patrol.">
+	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams">
 <meta name="keywords" 
 	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol, Paine Field Squadron, KPAE, Everett, Washington">
 
@@ -82,9 +83,6 @@ drawSectionalOptions($default_sectional);
 ?>
 	</select>
 </form>
-
-
-
 <IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=SEATTLE" frameBorder=0 width=500 scrolling=no height=200></IFRAME>
 
 
