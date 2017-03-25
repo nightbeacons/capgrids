@@ -33,7 +33,8 @@ function initMap() {
 ";
 
 $qs = $_SERVER['QUERY_STRING'];
-$url = "http://www.painefieldcap.org/g2/kml.php?" . $qs;
+// $url = "http://www.painefieldcap.org/g2/kml.php?" . $qs;
+$url = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
 echo "    url: '" . $url . "',";
 ?>
     map: map
@@ -45,7 +46,8 @@ echo "    url: '" . $url . "',";
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBwA88JVm20c5Hv-sHjytdIZKhhAvYyYWU&signed_in=true&callback=initMap">
     </script>
 <?php
-echo "http://www.painefieldcap.org/g2/kml.php?" . $qs;
+// echo "http://www.painefieldcap.org/g2/kml.php?" . $qs;
+echo "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
 ?>
   </body>
 </html>
