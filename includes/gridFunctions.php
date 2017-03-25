@@ -286,7 +286,6 @@ function drawSectionalOptions($defaultVal)
 {
 global $coordinates;
 reset($coordinates);
-
 $output="";
 $defaultVal=strtoupper(trim(preg_replace("/ /", "_", $defaultVal)));
 
@@ -384,35 +383,31 @@ $quadrantOffsets = array (
 );
 
 # ===================================================================================================
-# Find the magnetic variation for a given lon/lat
-#
-# 	$lat is decimal degrees. North is positive
-# 	$lon is decimal degrees. East is positive
-#    See http://www.ngdc.noaa.gov/geomag-web/#declination
 
+/**
+ * Get current magnetic variation (declination) for given lat/lon
+ * See https://www.ngdc.noaa.gov/geomag/help/declinationHelp.html
+ * Sample GET: https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination?lat1=40&lon1=-105.25&resultFormat=xml
+ *    $lat is decimal degrees. North is positive
+ *    $lon is decimal degrees. East is positive
+ */
 function magVariation($lat, $lon)
 {
-$baseUrl = "http://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination;";
-
-$session=strtoupper(dechex(microtime(true)) . strrev(dechex(microtime(true))));
-$session .= $session;
-
-# Use for the most up-to-date variation
-# $dateString = "&startYear=" . date("Y") . "&startMonth=" . date("n") . "&startDay=" . date("j");
+$baseUrl = "https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
 
 # Use for the variation found on Sectional Charts
 #$dateString = "minYear=2004&minMonth=6&minDay=30";
 
-$format = "&ResultFormat=xml";    		# Format of calculation results: 'html', 'csv', 'xml', or 'pdf'
+$format = "&resultFormat=xml";                  # Format of calculation results: 'html', 'csv', 'xml', or 'pdf'
 
-$url=$baseUrl . "jsessionid=$session?lat1=" . trim($lat) .  "&lon1=" . trim($lon) .   $format;
+$url=$baseUrl . "?lat1=" . trim($lat) .  "&lon1=" . trim($lon) .   $format;
 
-$ch = curl_init(); 
+$ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
-$output = curl_exec($ch); 
-curl_close($ch);    
+$output = curl_exec($ch);
+curl_close($ch);
 
 $p = xml_parser_create();
 xml_parse_into_struct($p, $output, $vals, $index);
@@ -426,6 +421,8 @@ $decl= - round($decl, 1);
 return ($decl);
 
 }
+
+
 # ===================================================================================================
 # Use geolocation services to find default sectional for current area
 #   Input = empty
@@ -433,25 +430,76 @@ return ($decl);
 
 function ourSectional()
 {
+$longitude="-147";
+$latitude="38";
 
-$geolocationURL = "http://freegeoip.net/xml/";
+$geolocationURL="http://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] . "/loc";
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $geolocationURL);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);    // Timeout in 4 seconds
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+//curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
+$output = curl_exec($ch);
+curl_close($ch);
+
+// Split into array, Lat first, then lon
+$latLonAry = explode(",", $output);
+  if(count($latLonAry) == 2){
+  $latitude=(float)$latLonAry[0];
+  $longitude=(float)$latLonAry[1];
+  }
+
+$latlonAry = lonlat2grid($longitude, $latitude);
+$sectional = $latlonAry['sectional'];
+return($sectional);
+
+}
+
+
+
+# ===================================================================================================
+#     DEPRECATED
+# Use geolocation services to find default sectional for current area
+#   Input = empty
+#   Return = full name of sectional, such as "SEATTLE";
+
+function ourSectional2()
+{
+$longitude="-147";
+$latitude="48";
+$geolocationURLs = array("https://www.sonosite.com/apps/index.php?callback=loc",
+                         "http://ajaxhttpheaders.appspot.com?callback=loc");
+
+// $geolocationURL = "http://freegeoip.net/xml/";
 
 $ch = curl_init(); 
-curl_setopt($ch, CURLOPT_URL, $geolocationURL);
+curl_setopt($ch, CURLOPT_URL, $geolocationURLs[0]);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);    // Timeout in 4 seconds
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
 curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
 $output = curl_exec($ch); 
 curl_close($ch);    
+$output = preg_replace("/loc\((.*)\)$/", "$1",  $output );
+$output = str_replace("'", "\"", $output);   // json cannot handle single quotes
+$json_data = (array)json_decode($output, TRUE);
 
-$p = xml_parser_create();
-xml_parse_into_struct($p, $output, $vals, $index);
-xml_parser_free($p);
+if (isset($json_data['latitude'])) $latitude=$json_data['latitude'];
+if (isset($json_data['longitude'])) $longitude=$json_data['longitude'];
 
-$latIdx = $index['LATITUDE'][0];
-$lonIdx = $index['LONGITUDE'][0];
+//$p = xml_parser_create();
+//xml_parse_into_struct($p, $output, $vals, $index);
+//xml_parser_free($p);
 
-$latitude = $vals[$latIdx]['value'];
-$longitude = $vals[$lonIdx]['value'];
+//$latIdx = $index['LATITUDE'][0];
+//$lonIdx = $index['LONGITUDE'][0];
+
+//$latitude = $vals[$latIdx]['value'];
+//$longitude = $vals[$lonIdx]['value'];
 
 $latlonAry = lonlat2grid($longitude, $latitude);
 
