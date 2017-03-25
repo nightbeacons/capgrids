@@ -145,20 +145,22 @@ echo "<h1 style=\"color:#CC3300;margin-bottom:0;\">Google Mapping for $abbrev $m
 $kmlURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant;
 $zoom=11;
 if ($myquadrant == "E") $zoom=10;
-
 $kmlURLencoded = rawurlencode($kmlURL);
 
 $fplURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "fpl.php?id=" . $sectional . "&mygrid=" . $mygrid ;
 
-
 $TerrainMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
 $TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
 
+// $TerrainMapiframeSrc = "http://www.painefieldcap.org/g2/kmlLoader.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant . "&MapTypeId=TERRAIN&embed=1";
+$TerrainMapiframeSrc = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant . "&MapTypeId=TERRAIN&embed=1";
+
 $SatMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
 $SatMapiframeSrc  = $SatMapiframeBase .  "&amp;z=" . $zoom;
+//$SatMapiframeSrc  = "http://www.painefieldcap.org/g2/kmlLoader.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant . "&MapTypeId=HYBRID&embed=1";
+$SatMapiframeSrc  = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant . "&MapTypeId=HYBRID&embed=1";
 
-$iframeHref = $TerrainMapiframeBase .  "&amp;z=" . ($zoom + 1);
-
+# $iframeHref = $TerrainMapiframeBase .  "&amp;z=" . ($zoom + 1);
 #echo "<iframe id=\"top\" width=\"475\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $iframeSrc . "\"></iframe>";
 
 echo "<div class=\"maindiv\">";
@@ -174,13 +176,7 @@ echo "</div>
 
 </div>\n";
 
-
-
 ?>
-
-
-
-
 </body>
 </html>
 
