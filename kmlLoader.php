@@ -25,6 +25,9 @@ echo "
 function initMap() {
   var map = new google.maps.Map(document.getElementById('map'), {
     zoom: 11,
+    zoomControl: false,
+    scaleControl: false,
+    streetViewControl: false,
     mapTypeId: google.maps.MapTypeId." . $MapTypeId . ",
     center: {lat: 47.762, lng: -122.206}
   });
