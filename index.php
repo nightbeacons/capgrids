@@ -1,8 +1,8 @@
 <?php
 include_once("includes/gridFunctions.php");
 
-//$default_sectional = ourSectional();
-$default_sectional = "SEATTLE";
+$default_sectional = ourSectional();
+//$default_sectional = "SEATTLE";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>

@@ -83,7 +83,7 @@ $sw_coord = ($gridLon) . ","        . ($gridLat - 0.125) . ",0";
 }
 
 $buffer="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://earth.google.com/kml/2.1\">
+<kml xmlns=\"http://earth.google.com/kml/2.2\">
 <Document>
         <name>CAP Search Grids for $gridLabel</name>
         <open>1</open>

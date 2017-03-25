@@ -198,11 +198,16 @@ $kmlURLencoded = rawurlencode($kmlURL);
 $zoom=12;
 if ($selectedQuadrant=="E") $zoom=11;
 
-$TerrainMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
-$TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
+//$TerrainMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
+//$TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
+
+$TerrainMapiframeSrc = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=TERRAIN&embed=1";
 
 $SatMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
 $SatMapiframeSrc  = $SatMapiframeBase .  "&amp;z=" . $zoom;
+
+$SatMapiframeSrc  = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=HYBRID&embed=1";
+
 
 #$iframeSrc = "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=" . $zoom . "&amp;output=embed";
 $iframeHref = "http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=10";
