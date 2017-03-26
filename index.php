@@ -4,7 +4,7 @@ include_once("includes/gridFunctions.php");
 $default_sectional = ourSectional();
 //$default_sectional = "SEATTLE";
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -19,7 +19,7 @@ $default_sectional = ourSectional();
 
 <META NAME="revisit-after" content="15 days">
 
-<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="/js/jquery-1.9.1.js"></script>
 <script language="JavaScript" type="text/javascript">
 
   function gridHandler() {
@@ -60,11 +60,12 @@ $default_sectional = ourSectional();
 
 </head>
 
-<body>
+<body style="margin:0;">
 <?php include  "includes/top.php"; ?>
 
 <table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
-<?php include $_SERVER['DOCUMENT_ROOT'] . "/includes/navbar.php"; ?>
+<?php // include $_SERVER['DOCUMENT_ROOT'] . "/includes/navbar.php"; 
+?>
 
 </td><td valign="top" width="24"></td><td valign="top">
 
@@ -72,7 +73,7 @@ $default_sectional = ourSectional();
 	<!-- Begin Main Content Area -->
 	<!-- ======================= -->
 
-<table border="0" cellpadding="0" cellspacing="0"  align="left" id="table1" width="710" style="margin-left: 30px;">
+<table border="0" cellpadding="0" cellspacing="0"  align="left" id="table1" width="770" style="margin-left: 30px;">
 	<tr>
 		<td align="left" valign="top" width="500">
 <h1 style="color:#CC3300;margin-bottom:0;">Gridmaster: CAP Search Grids</h1>

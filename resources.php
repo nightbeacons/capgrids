@@ -82,7 +82,7 @@ $( "#slider" ).slider({
 range: "min",
 min: 0,
 max: 100,
-value: 50,
+value: 80,
 change: changeOpacity,
 slide: changeOpacity 
 });
@@ -111,12 +111,20 @@ function changeOpacity(){
 	margin-right: auto;
 	}
 
-#top, #bottom {
+#top {
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	opacity: 0.5;
+	opacity: 0.8;
 	}
+
+#bottom {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        opacity: 0.2;
+        }
+
 
 #slider {
 	position: relative;
@@ -164,8 +172,8 @@ $SatMapiframeSrc  = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).
 #echo "<iframe id=\"top\" width=\"475\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $iframeSrc . "\"></iframe>";
 
 echo "<div class=\"maindiv\">";
-echo "<iframe id=\"top\" width=\"475\" style=\"opacity: 0.5;\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $TerrainMapiframeSrc . "\"></iframe>";
-echo "<iframe id=\"bottom\" width=\"475\" style=\"opacity: 0.5;\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $SatMapiframeSrc . "\"></iframe>";
+echo "<iframe id=\"top\" width=\"475\" style=\"opacity: 0.8;\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $TerrainMapiframeSrc . "\"></iframe>";
+echo "<iframe id=\"bottom\" width=\"475\" style=\"opacity: 0.2;\" height=\"380\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $SatMapiframeSrc . "\"></iframe>";
 echo "<div id=\"slider\" title=\" Adjust Map Tranparency \"></div>\n";
 
 echo "<div id=\"text\">

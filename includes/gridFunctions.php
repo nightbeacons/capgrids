@@ -431,7 +431,7 @@ return ($decl);
 function ourSectional()
 {
 $longitude="-147";
-$latitude="38";
+$latitude="48";
 
 $geolocationURL="http://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] . "/loc";
 $ch = curl_init();
