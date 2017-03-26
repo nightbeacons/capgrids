@@ -3,6 +3,8 @@
 #
 # Find Grid Corners
 #
+# To debug print-only version, use URLs of the form http://gridmaster.nightbeacons.site/grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B&dev=1#
+#
 ################################################################
 error_reporting(0);
 include_once("includes/gridFunctions.php");
@@ -24,7 +26,7 @@ $onload="";
 $abbrev=$coordinates[$sectional]['Abbrev'];
 
 ?>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -53,6 +55,7 @@ div.screenonly {
 	display: block;
 	visibility:visible;
 	}
+
 }
 
 <?php
@@ -78,6 +81,8 @@ div.screenonly {
         left: 0px;
         opacity: 0.5;
         }
+
+
 
     -->
   </style>
@@ -168,12 +173,21 @@ $SurroundingGrids = GetSurroundingGridIDs($sectional, $selectedGrid, $selectedQu
 
 $avgLon=($resultRaw['NW']['lon'] + $result['NE']['lon'])/2;
 $avgLat=($resultRaw['NW']['lat'] + $result['SW']['lat'])/2;
-$variation =  magVariation($avgLat, $avgLon);
+$variation =  $variationSigned = magVariation($avgLat, $avgLon);
 $varDir="W";
 	if ($variation < 0) {
 	$varDir="E";
 	$variation=abs($variation);
 	}
+$northSteer = 360 + $variationSigned;
+   if ($northSteer >= 360) $northSteer -= 360;
+
+$steer = array("North" => sprintf("%03d", floor($northSteer + 0.5)),
+               "East"  => sprintf("%03d", floor(90 + $variationSigned + 0.5)),
+               "South" => floor(180 + $variationSigned + 0.5),
+               "West"  => floor(270 + $variationSigned + 0.5)
+         );
+
 echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\" align=\"center\" style=\"border-width:10px;border-style:solid;border-color:#c0c0c0;\"><tr><td><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\" align=\"center\">
 <tr><td width=\"$cellWidth\" valign=\"bottom\" align=\"right\" class=\"coord\">" . $result['NW']['lat'] . "<br>" . $result['NW']['lon'] . "</td><td width=\"($cellWidth + 75)\">&nbsp;</td><td valign=\"bottom\" align=\"left\" width=\"$cellWidth\" class=\"coord\">" . $result['NE']['lat'] . "<br>" . $result['NE']['lon'] . "</td></tr>
 <tr><td>&nbsp;</td><td align=\"center\" valign=\"middle\" style=\"border-width:2px;border-style:solid;width:" . $cellWidth . "px;height:80px;background-color:#f0f0f0;\">" . $coordinates[$sectional]['Abbrev'] . "<br>$selectedGrid $displayQuadrant<br><img src=\"/images/spacer.gif\" style=\"width:" . $cellWidth . "px;height:1px;\"></td><td width=\"$cellWidth\">&nbsp;</td></tr>
@@ -220,10 +234,23 @@ echo "<iframe id=\"bottommap\" width=\"645\" height=\"680\" style=\"opacity:0.5;
 <tr valign="top"><td align="left" class="coord" width="162"><?php echo $result['SW']['lat'] . "<br>" . $result['SW']['lon']; ?></td>
 <td align="center">&darr;&nbsp;<?php echo $coordinates[$SurroundingGrids['South']['sectional']]['Abbrev'] . " " . $SurroundingGrids['South']['grid'] . $SurroundingGrids['South']['quadrant'];  ?> &nbsp;&darr;</td>
 <td align="right" class="coord" width="162"><?php echo $result['SE']['lat'] . "<br>" . $result['SE']['lon']; ?></td></tr>
-<tr valign="top"><td align="center" class="coord" colspan="3"><i>Avg Mag Variation:</i></nobr><br><nobr><i><?php echo "$variation&deg; $varDir"; ?></i></td></tr>
+<tr valign="top"><td align="center" class="coord" colspan="3"><i>Avg Mag Variation:</i></nobr><br><nobr><i><?php echo "$variation&deg; $varDir"; ?></i>
+
+
+<div style="float:left;width:33%;">
+<table style="display:inline;width:50%;" cellpadding=5 cellspacing=0 border="1"><tr><th>For:</th><th>Steer:</th></tr>
+<tr><td>North</td><td align="center"><?php echo $steer['North']; ?></td></tr>
+<tr><td>South</td><td align="center"><?php echo $steer['South']; ?></td></tr>
+</table>&nbsp;
+<table style="display:inline;width:50%;" cellpadding=5 cellspacing=0 border="1"><tr><th>For:</th><th>Steer:</th></tr>
+<tr><td>East</td><td align="center"><?php echo $steer['East']; ?></td></tr>
+<tr><td>West</td><td align="center"><?php echo $steer['West']; ?></td></tr>
+</table>
+</div>
+
+</td></tr>
 
 </table>
-
 </div>
 </body>
 </html>
