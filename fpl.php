@@ -43,8 +43,8 @@ $creationDate = gmdate("Y-m-d\TH:i:s\Z");
 $FPLheader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <flight-plan xmlns=\"http://www8.garmin.com/xmlschemas/FlightPlan/v1\">
   <author>
-     <author-name>CAP Gridmaster</author-name>
-     <link>www.painefieldcap.org/gridmaster/</link>
+     <author-name>CAPgrids</author-name>
+     <link>www.capgrids.com/</link>
   </author>
   <created>$creationDate</created>\n";
 

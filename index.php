@@ -9,7 +9,7 @@ $default_sectional = ourSectional();
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="en-us">
-<title>Gridmaster | Civil Air Patrol Emergency Services</title>
+<title>CAPgrids | Civil Air Patrol Emergency Services</title>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 <meta name="description" 
@@ -61,22 +61,21 @@ $default_sectional = ourSectional();
 </head>
 
 <body style="margin:0;">
-<?php include  "includes/top.php"; ?>
+<?php include_once("includes/ga.php") ?>
+<table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
 
-<table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
-<?php // include $_SERVER['DOCUMENT_ROOT'] . "/includes/navbar.php"; 
-?>
-
-</td><td valign="top" width="24"></td><td valign="top">
+<tr>
+<td valign="top">
 
 	<!-- ======================= -->
 	<!-- Begin Main Content Area -->
 	<!-- ======================= -->
 
-<table border="0" cellpadding="0" cellspacing="0"  align="left" id="table1" width="770" style="margin-left: 30px;">
+<table border="0" cellpadding="0" cellspacing="0"  align="left" id="table1" width="850" style="margin-left: 0;">
 	<tr>
 		<td align="left" valign="top" width="500">
-<h1 style="color:#CC3300;margin-bottom:0;">Gridmaster: CAP Search Grids</h1>
+<h1 style="color:#CC3300;margin-bottom:0;">CAPgrids: CAP Search Grids</h1>
 <form name="gridPulldown" >
 	<select name="sectionalMenu" id="sectionalMenu" onChange="javascript:gridHandler();" style="border-color:black;border-width:1px;border-color:#303030;">
 <?php
@@ -125,7 +124,6 @@ include_once("help/findcorners.php");
 <tr><td colspan="2"><hr></td></tr>
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
 <IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=SEATTLE&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
-<div class="coord" style="color:#909090; font-size:12px;margin-top:20px;"><i>Gridmaster</i> developed by <a class="credit" style="color:#909090;" href="mailto:nightbeacons@gmail.com">Capt Charles Jackson</a></div>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
@@ -139,7 +137,7 @@ include_once("help/resources.php");
 	<!--  End Main Content Area  -->
 	<!-- ======================= -->
 
-</td></tr></table>
-<?php include $_SERVER['DOCUMENT_ROOT'] . "/includes/footer.php"; ?>
+</td></tr>
+<tr><td><?php include $_SERVER['DOCUMENT_ROOT'] . "/includes/footer.php"; ?></td></tr></table>
 </body>
 </html>
