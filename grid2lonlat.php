@@ -3,7 +3,7 @@
 #
 # Find Grid Corners
 #
-# To debug print-only version, use URLs of the form http://gridmaster.nightbeacons.site/grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B&dev=1#
+# To debug print-only version, use URLs of the form http://www.capgrids.com/grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B&dev=1#
 #
 ################################################################
 error_reporting(0);
@@ -205,7 +205,7 @@ echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\"
 &rarr;<br><?php echo $coordinates[$SurroundingGrids['East']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['East']['grid'] . $SurroundingGrids['East']['quadrant'];  ?></nobr> <br>&rarr;</td></tr>
 <tr valign="bottom"><td align="left" class="coord" width="162"><?php echo $result['NW']['lat'] . "<br>" . $result['NW']['lon']; ?></td><td align="center" width="50%">&uarr;&nbsp;
 <?php echo $coordinates[$SurroundingGrids['North']['sectional']]['Abbrev'] . " " . $SurroundingGrids['North']['grid'] . $SurroundingGrids['North']['quadrant'];  ?> &nbsp;&uarr;</td><td align="right" class="coord" width="162"><?php echo $result['NE']['lat'] . "<br>" . $result['NE']['lon']; ?></td></tr>
-<tr valign="top"><td align="center" colspan="3""><div style="position: relative;"><img src="images/spacer.gif" width="645" height="690"><?php
+<tr valign="top"><td align="center" colspan="3"><div style="position: relative;"><img src="images/spacer.gif" width="645" height="690"><?php
 $kmlURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
 
 $kmlURLencoded = rawurlencode($kmlURL);

@@ -1,1 +1,1 @@
-# gridmaster
+# CAPgrids, formerly gridmaster
