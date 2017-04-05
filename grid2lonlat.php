@@ -31,7 +31,7 @@ $abbrev=$coordinates[$sectional]['Abbrev'];
 
 <head>
 <title><?php echo "$abbrev $selectedGrid"; ?> </title>
-
+<meta name="robots" content="noindex, nofollow">
   <style type="text/css">
     <!--
 

@@ -58,7 +58,7 @@ $googleMapUrl="http://maps.google.com/maps?f=q&hl=en&geocode=&q=$rawLat,$rawLon&
 <html>
 
 <head>
-
+<meta name="robots" content="noindex, nofollow">
   <style type="text/css">
     <!--
 
