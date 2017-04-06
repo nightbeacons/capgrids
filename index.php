@@ -63,7 +63,7 @@ $default_sectional = ourSectional();
 <body style="margin:0;">
 <?php include_once("includes/ga.php") ?>
 <table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%" style="position:relative;">
-<tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><h1 class="overlay">CAPgrids</h1><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
+<tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><div class="bannerOverlay"><h1 class="overlay">CAPgrids</h1><h3 class="overlay">The Swiss-Army Knife of Search Grids<h3></div><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
 
 <tr>
 <td valign="top">
