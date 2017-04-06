@@ -2468,10 +2468,6 @@ hr
 .helptip {      background:#FFFF99;
 	}
 
-il
-{
-	list-style-image: url('radbul2.gif');
-}
 img.ms-button
 {
 	cursor: hand;
@@ -2613,6 +2609,53 @@ th
 tr.ms-imglibselectedrow
 {
 	background-color: #A5BACF;
+}
+
+
+h1.overlay{
+  font-family: Arial;
+  color: red;
+  text-shadow: 3px 3px black;
+  font-size: 50px;
+  font-weight:700;
+}
+
+h3.overlay{
+position:relative;
+top: 30px;
+right:40px;
+  font-family: Arial;
+  font-style: italic;
+  text-shadow: 1px 1px #202020;
+  font-size: 25px;
+  font-weight:500;
+  background-color: rgba(255,255,255,0.8);
+}
+span.overlay{
+  font-weight:400; 
+}
+
+div.bannerOverlay{
+  position:absolute;
+  top:5px;
+  left:36%;
+  z-index:99;
+}
+
+h2.main {
+  font-family: Arial;
+  color:#CC3300;
+  font-size: 30px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+h3.main{
+  font-family: Arial;
+  color:#CC3300;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 td.pageBGleft {
