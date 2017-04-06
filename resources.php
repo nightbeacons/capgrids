@@ -101,6 +101,8 @@ function changeOpacity(){
 
 
 <link rel="stylesheet" href="css/jquery-ui.css" />
+<link rel="stylesheet" href="css/style.css" />
+
   <style type="text/css">
     <!--
 
@@ -147,7 +149,7 @@ function changeOpacity(){
 </head>
 <body>
 <?php
-echo "<h1 style=\"color:#CC3300;margin-bottom:0;\">Google Mapping for $abbrev $mygrid$quadrantDisplay</h1>\n";
+echo "<h2 class=\"main\">Google Mapping for $abbrev $mygrid$quadrantDisplay</h2>\n";
 
 
 $kmlURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant;

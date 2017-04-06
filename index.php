@@ -75,7 +75,7 @@ $default_sectional = ourSectional();
 <table border="0" cellpadding="0" cellspacing="0"  align="left" id="table1" width="850" style="margin-left: 0;">
 	<tr>
 		<td align="left" valign="top" width="500">
-<h1 style="color:#CC3300;margin-bottom:0;">CAPgrids: CAP Search Grids</h1>
+<h2 class="main">CAPgrids: CAP Search Grids</h2>
 <form name="gridPulldown" >
 <i>Select a Sectional:</i> &nbsp;	<select name="sectionalMenu" id="sectionalMenu" onChange="javascript:gridHandler();" style="border-color:black;border-width:1px;border-color:#303030;">
 
@@ -95,12 +95,7 @@ include_once("help/searchgrid.php");
 	</tr>
 <tr><td colspan="2"><hr></td></tr>
 
-
-
-
-
-
-<tr><td valign="top"><h1 style="color:#CC3300;margin-bottom:0;">Find a Grid</h1>
+<tr><td valign="top"><h2 class="main">Find a Grid</h2>
 
 <IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=-119&lat=48" frameBorder=0 width=500 scrolling=no height=200 ></IFRAME>
 </td>
@@ -112,7 +107,7 @@ include_once("help/findgrid.php");
 
 
 <tr><td colspan="2"><hr></td></tr>
-<tr><td valign="top"><h1 style="color:#CC3300;margin-bottom:0;">Find Grid Corners</h1>
+<tr><td valign="top"><h2 class="main">Find Grid Corners</h2>
 <img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;bottom:30px;margin-right:20px;cursor:pointer;cursor:hand;">
 
 <IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=300 ></IFRAME>
