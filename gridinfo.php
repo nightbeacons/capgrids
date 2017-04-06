@@ -1,10 +1,24 @@
 <?php
 include_once("includes/coordinates.php");
+?>
+<style type="text/css">
+li{
+  font-family: Arial;
+}
 
+a{
+ text-decoration: none;
+}
+
+a:hover{
+ text-decoration: underline;
+}
+</style>
+<?php
 $sectional=$_GET['id'];
 
 $sectionalName=ucwords(strtolower(preg_replace("/_/"," ", $sectional)));
-echo "<hr width=\"50%\"><h2 style=\"color:#CC3300; text-align:center;\">Search grids for the $sectionalName sectional</h2>\n";
+echo "<hr width=\"50%\"><h3 style=\"color:#CC3300; font-family: Arial; font-size: 20px; font-weight: 600;text-align:center;\">Search Grids for the $sectionalName Sectional</h3>\n";
 
 $kmz = "overlays/" . $coordinates[$sectional]['Abbrev'] . "_grid.kmz";
 

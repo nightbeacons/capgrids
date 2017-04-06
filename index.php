@@ -13,7 +13,7 @@ $default_sectional = ourSectional();
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 <meta name="description" 
-	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams">
+	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams. The Swiss Army Knife of Search Grids, it can calculate grid corners and grid identifiers for any US Sectional chart. It also provides adjustable maps, and large map printouts."">
 <meta name="keywords" 
 	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, Google Earth overlay, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol">
 
