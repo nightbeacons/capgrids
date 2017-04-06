@@ -15,7 +15,7 @@ $default_sectional = ourSectional();
 <meta name="description" 
 	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams">
 <meta name="keywords" 
-	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol, Paine Field Squadron, KPAE, Everett, Washington">
+	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, Google Earth overlay, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol">
 
 <META NAME="revisit-after" content="15 days">
 
@@ -62,8 +62,8 @@ $default_sectional = ourSectional();
 
 <body style="margin:0;">
 <?php include_once("includes/ga.php") ?>
-<table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
+<table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%" style="position:relative;">
+<tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><h1 class="overlay">CAPgrids</h1><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
 
 <tr>
 <td valign="top">
@@ -77,7 +77,8 @@ $default_sectional = ourSectional();
 		<td align="left" valign="top" width="500">
 <h1 style="color:#CC3300;margin-bottom:0;">CAPgrids: CAP Search Grids</h1>
 <form name="gridPulldown" >
-	<select name="sectionalMenu" id="sectionalMenu" onChange="javascript:gridHandler();" style="border-color:black;border-width:1px;border-color:#303030;">
+<i>Select a Sectional:</i> &nbsp;	<select name="sectionalMenu" id="sectionalMenu" onChange="javascript:gridHandler();" style="border-color:black;border-width:1px;border-color:#303030;">
+
 <?php
 drawSectionalOptions($default_sectional);
 ?>
