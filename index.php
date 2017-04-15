@@ -19,7 +19,7 @@ $default_sectional = ourSectional();
 
 <META NAME="revisit-after" content="15 days">
 
-<script type="text/javascript" src="/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" async src="/js/jquery-1.9.1.js"></script>
 <script language="JavaScript" type="text/javascript">
 
   function gridHandler() {
