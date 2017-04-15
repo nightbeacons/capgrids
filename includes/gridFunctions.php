@@ -136,12 +136,13 @@ return ($gridBox);
 
 }
 
-# ===================================================================================================
-# changeFormat($decDegree,$format)
-#
-# Changes a degree value of the form XX.yyy into Degrees + Decimal Minutes (dmm)
-#                                             or Degrees Minutes Seconds (dms)     
-#					      or do nothing (raw)	
+/**
+ * changeFormat($decDegree,$format)
+ *
+ * Changes a degree value of the form XX.yyy into Degrees + Decimal Minutes (dmm)
+ *                                            or Degrees Minutes Seconds (dms)     
+ *					      or do nothing (raw)	
+ */
 
 function changeFormat($decDegree, $format)
 {
@@ -257,9 +258,7 @@ $found=0;
 	 		"quadrant"	=> $quadrant
 		);
 		}
-
 	}
-
 
 	if (! $found) {
         $result = array (
@@ -269,9 +268,7 @@ $found=0;
          );
 	}
 
-
 return($result);
-
 }
 
 
@@ -298,8 +295,6 @@ $defaultVal=strtoupper(trim(preg_replace("/ /", "_", $defaultVal)));
 
 echo $output;
 }
-
-
 
 # ===================================================================================================
 # drawGridOptions()
@@ -453,6 +448,13 @@ $latLonAry = explode(",", $output);
 
 $latlonAry = lonlat2grid($longitude, $latitude);
 $sectional = $latlonAry['sectional'];
+
+// $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
+// $fh = fopen($logfile, "a");
+// $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
+// fwrite($fh, $record);
+// fclose($fh);
+
 return($sectional);
 
 }
