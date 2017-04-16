@@ -29,19 +29,6 @@ p.footer
 	font-size: 8px;
 }
 
-
-ul
-{
-	list-style-image: url('aradbul1.gif');
-}
-ul ul
-{
-	list-style-image: url('aradbul2.gif');
-}
-ul ul ul
-{
-	list-style-image: url('aradbul3.gif');
-}
 a:link
 {
 	color: rgb(153, 102, 51);
@@ -100,12 +87,6 @@ h6
 hr
 {
 	color: rgb(0, 0, 0);
-}
-button
-{
-}
-label
-{
 }
 
 td.directory, div.directory {
