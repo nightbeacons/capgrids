@@ -41,30 +41,11 @@ a:visited
 {
 	color: rgb(102, 102, 0);
 }
-body
-{
-	background-color: rgb(255, 255, 255);
-	color: rgb(0, 0, 0);
-}
-table
-{
-	table-border-color-light: rgb(0, 0, 0);
-	table-border-color-dark: rgb(0, 0, 0);
-	border-color: rgb(0, 0, 0);
-}
-th
+th, td
 {
 	border-color: rgb(0, 0, 0);
 }
-td
-{
-	border-color: rgb(0, 0, 0);
-}
-h1
-{
-	color: rgb(0, 0, 0);
-}
-h3
+h1, h3, h5, h6, select, caption
 {
 	color: rgb(0, 0, 0);
 }
@@ -75,18 +56,6 @@ h3.head {
 	font-family: Garamond, Serif;
 	font-size: 24px;
 	color: #CC3300;
-}
-h5
-{
-	color: rgb(0, 0, 0);
-}
-h6
-{
-	color: rgb(0, 0, 0);
-}
-hr
-{
-	color: rgb(0, 0, 0);
 }
 
 td.directory, div.directory {
@@ -125,16 +94,6 @@ a.directory:hover {
 	text-decoration: underline;
 }
 
-select
-{
-	color: rgb(0, 0, 0);
-}
-caption
-{
-	color: rgb(0, 0, 0);
-}
-
-
 body
 {
 	font-weight: normal;
@@ -167,12 +126,6 @@ caption
 	font-family: verdana,arial,helvetica;
 	font-style: normal;
 }
-div.ms-titleareaframe
-{
-	border-top-width: 4px;
-	border-top-color: #AFAFAF;
-	border-top-style: solid;
-}
 fieldset
 {
 	border-top-width: 1pt;
@@ -185,53 +138,6 @@ fieldset
 	border-right-width: 1pt;
 	font-style: normal;
 	border-bottom-style: solid;
-}
-h1
-{
-	font-weight: bold;
-	vertical-align: none;
-	font-family: Garamond;
-	font-style: normal;
-	text-align: none;
-}
-h2
-{
-	font-weight: normal;
-	font-family: Garamond,Times New Roman,Times;
-	font-style: normal;
-}
-h3
-{
-	font-size: 25px;
-	font-weight: normal;
-	font-style: normal;
-	font-family: Garamond;
-	vertical-align: none;
-	text-align: none;
-	color: #CC3300;
-}
-h4
-{
-	font-weight: bold;
-	font-family: arial,helvetica;
-	font-style: normal;
-	text-align: none;
-	vertical-align: none;
-	margin-bottom: 0;
-}
-h5
-{
-	font-weight: normal;
-	font-family: Arial;
-	vertical-align: none;
-	font-style: normal;
-	text-align: none;
-}
-h6
-{
-	font-weight: normal;
-	font-family: verdana,arial,helvetica;
-	font-style: normal;
 }
 hr
 {
@@ -257,20 +163,6 @@ img.thumbnail
 	border-top-width: 3px;
 	border-left-width: 3px;
 }
-label, .mstheme-label
-{
-	font-style: normal;
-	font-family: verdana,arial,helvetica;
-}
-legend
-{
-	font-style: normal;
-	font-family: verdana,arial,helvetica;
-}
-marquee
-{
-	font-family: verdana,arial,helvetica;
-}
 select
 {
 	border-style:solid; font-style: normal;
@@ -286,11 +178,6 @@ span.thumbnail
 	padding-right: 10;
 	padding-left: 10;
 }
-span.userdata
-{
-	behavior: url(#default#userData);
-	display: none;
-}
 table
 {
 	vertical-align: none;
@@ -298,56 +185,6 @@ table
 	font-style: normal;
 	font-family: Arial;
 	text-align: none;
-}
-table.ms-form td
-{
-	width: 100%;
-	vertical-align: top;
-}
-table.ms-form th
-{
-	font-weight: normal;
-	color: #000000;
-	font-family: verdana,arial,helvetica;
-	vertical-align: top;
-}
-table.ms-imglibpreviewtable
-{
-	display: none;
-}
-table.ms-imglibtitletable
-{
-	border-right-color: #AFAFAF;
-	border-right-style: solid;
-	border-top-width: 0px;
-	border-top-color: #AFAFAF;
-	border-top-style: solid;
-	border-bottom-width: 0px;
-	border-left-width: 0px;
-	border-bottom-color: #AFAFAF;
-	border-left-color: #AFAFAF;
-	border-right-width: 0px;
-	border-bottom-style: solid;
-	border-left-style: solid;
-}
-table.ms-titleareaframe
-{
-	border-left-width: 0px;
-	border-left-color: inherit;
-	border-left-style: none;
-}
-table.ms-toolbar
-{
-	border:1px solid #BBBBBB; background-image: url('toolgrad.gif');
-	
-}
-td.ms-titleareaframe
-{
-	border-bottom-color: #AFAFAF;
-	color: #000000;
-	border-right-color: #AFAFAF;
-	border-top-color: #AFAFAF;
-	border-left-color: #AFAFAF;
 }
 textarea
 {
@@ -359,10 +196,6 @@ th
 {
 	font-family: verdana,arial,helvetica;
 	font-style: bold;
-}
-tr.ms-imglibselectedrow
-{
-	background-color: #A5BACF;
 }
 
 
