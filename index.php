@@ -1,7 +1,8 @@
 <?php
 include_once("includes/gridFunctions.php");
 
-$default_sectional = ourSectional();
+$sectionalAry = ourSectional();
+$default_sectional = $sectionalAry['name'];
 //$default_sectional = "SEATTLE";
 ?>
 <!DOCTYPE html>
@@ -33,7 +34,6 @@ $default_sectional = ourSectional();
   }
 
   function setGridWindow(sectional, grid, quadrant) {
-
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
 //  document.getElementById('sectionalMenu').options[sectional].selected = true;
   document.getElementById('resources').src = 'resources.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
@@ -42,10 +42,8 @@ $default_sectional = ourSectional();
   function printHandler() {
   var win1Handle = document.getElementById('win1');
   var resHandle  = document.getElementById('resources');
-
   var op1 = window.frames['resources'].document.getElementById('top').style.opacity;
   var op2 = 1 - op1;
-  
   window.frames['win1'].document.getElementById('topmap').style.opacity= op1;
   window.frames['win1'].document.getElementById('bottommap').style.opacity= op2;
 
@@ -55,11 +53,8 @@ $default_sectional = ourSectional();
   });
   return false;
   }
-
   </script>
-
 </head>
-
 <body style="margin:0;">
 <?php include_once("includes/ga.php") ?>
 <table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%" style="position:relative;">
@@ -84,7 +79,7 @@ drawSectionalOptions($default_sectional);
 ?>
 	</select>
 </form>
-<IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=SEATTLE" frameBorder=0 width=500 scrolling=no height=200></IFRAME>
+<IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=<?php echo $default_sectional;?>" frameBorder=0 width=500 scrolling=no height=200></IFRAME>
 
 
 </td><td valign="top" width="200" bgcolor="#fef0f0">
@@ -97,7 +92,7 @@ include_once("help/searchgrid.php");
 
 <tr><td valign="top"><h2 class="main">Find a Grid</h2>
 
-<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=-119&lat=48" frameBorder=0 width=500 scrolling=no height=200 ></IFRAME>
+<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 width=500 scrolling=no height=200 ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
@@ -110,7 +105,7 @@ include_once("help/findgrid.php");
 <tr><td valign="top"><h2 class="main">Find Grid Corners</h2>
 <img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;bottom:30px;margin-right:20px;cursor:pointer;cursor:hand;">
 
-<IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=300 ></IFRAME>
+<IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
@@ -119,7 +114,7 @@ include_once("help/findcorners.php");
 </td></tr>
 <tr><td colspan="2"><hr></td></tr>
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
-<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=SEATTLE&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
+<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
@@ -128,11 +123,9 @@ include_once("help/resources.php");
 </td></tr>
 </table>
 <p style="margin-top: 0; margin-bottom: 0"></p>
-
 	<!-- ======================= -->
 	<!--  End Main Content Area  -->
 	<!-- ======================= -->
-
 </td></tr>
 <tr><td><?php include $_SERVER['DOCUMENT_ROOT'] . "/includes/footer.php"; ?></td></tr></table>
 </body>

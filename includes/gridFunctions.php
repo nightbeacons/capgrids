@@ -421,7 +421,13 @@ return ($decl);
 # ===================================================================================================
 # Use geolocation services to find default sectional for current area
 #   Input = empty
-#   Return = full name of sectional, such as "SEATTLE";
+#   Return = array('name' => full name of sectional, such as "SEATTLE";
+#                   'grid'       => $latlonAry['grid'],
+#                   'quadrant'   => $latlonAry['quadrant'],
+#                   'longitude'  => $longitude,                decimal format, such as -120.876
+#                   'latitude'   => $latitude                  decimal format, such as 35.987
+#                  );
+
 
 function ourSectional()
 {
@@ -449,13 +455,20 @@ $latLonAry = explode(",", $output);
 $latlonAry = lonlat2grid($longitude, $latitude);
 $sectional = $latlonAry['sectional'];
 
-// $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
-// $fh = fopen($logfile, "a");
-// $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
-// fwrite($fh, $record);
-// fclose($fh);
+ $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
+ $fh = fopen($logfile, "a");
+ $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
+ fwrite($fh, $record);
+ fclose($fh);
 
-return($sectional);
+$sectionalArray = array('name'       => $latlonAry['sectional'],
+                        'grid'       => $latlonAry['grid'],
+                        'quadrant'   => $latlonAry['quadrant'],
+                        'longitude'  => $longitude,
+                        'latitude'   => $latitude
+                       );
+
+return($sectionalArray);
 
 }
 
