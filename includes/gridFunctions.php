@@ -455,11 +455,11 @@ $latLonAry = explode(",", $output);
 $latlonAry = lonlat2grid($longitude, $latitude);
 $sectional = $latlonAry['sectional'];
 
- $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
- $fh = fopen($logfile, "a");
- $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
- fwrite($fh, $record);
- fclose($fh);
+ // $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
+ // $fh = fopen($logfile, "a");
+ // $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
+ // fwrite($fh, $record);
+ // fclose($fh);
 
 $sectionalArray = array('name'       => $latlonAry['sectional'],
                         'grid'       => $latlonAry['grid'],
