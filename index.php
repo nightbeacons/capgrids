@@ -32,7 +32,6 @@ $default_sectional = $sectionalAry['name'];
   function setCornerUrl(newurl) {
   	document.getElementById('win1').src='grid2lonlat.php?' + newurl; 
   }
-
   function setGridWindow(sectional, grid, quadrant) {
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
 //  document.getElementById('sectionalMenu').options[sectional].selected = true;
@@ -92,7 +91,7 @@ include_once("help/searchgrid.php");
 
 <tr><td valign="top"><h2 class="main">Find a Grid</h2>
 
-<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 width=500 scrolling=no height=200 ></IFRAME>
+<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:10em;" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
