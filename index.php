@@ -114,7 +114,7 @@ include_once("help/findcorners.php");
 </td></tr>
 <tr><td colspan="2"><hr></td></tr>
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
-<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=139&myquadrant=B" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
+<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0">
 <?php
