@@ -19,6 +19,10 @@
     <div id="map"></div>
     <script>
 <?php
+include_once("includes/gridFunctions.php");
+$gridBoxAry = grid2lonlat($_GET['id'], $_GET['mygrid'], $_GET['myquadrant'], 'raw');
+$avgLat = ($gridBoxAry['NW']['lat'] + $gridBoxAry['SW']['lat']) / 2;
+$avgLon = ($gridBoxAry['NW']['lon'] + $gridBoxAry['NE']['lon']) / 2;
 $MapTypeId=$_GET['MapTypeId'];
 
 echo "
@@ -29,7 +33,7 @@ function initMap() {
     scaleControl: false,
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId." . $MapTypeId . ",
-    center: {lat: 47.762, lng: -122.206}
+ //   center: {lat: " . $avgLat . ", lng: " . $avgLon . "}
   });
 
   var ctaLayer = new google.maps.KmlLayer({
