@@ -23,7 +23,7 @@ $mapType = array(
 
 # ===================================================================================================
 # grid2lonlat()
-# Return the Lon/Lat for a given grid
+# Returns array of the Lon/Lat for the four corners of a given grid
 #   Input values:
 #		- Full Sectional Name
 #		- Grid Number
