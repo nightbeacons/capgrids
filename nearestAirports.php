@@ -26,11 +26,16 @@ echo "<h2 class=\"main\">Nearest airports to $gridLabel</h2><p style=\"margin-to
 // echo "<p>Center at $latGridCenter x $lonGridCenter</p>";
 
 // http://airnav.com/cgi-bin/airport-search?place=&airportid=&lat=44.654&NS=N&lon=122.765&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=20&distanceunits=nm
-$url = "http://www.airnav.com/cgi-bin/airport-search?place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
+// $url = "http://www.airnav.com/cgi-bin/airport-search?place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
 
+$url = "http://www.airnav.com/cgi-bin/airport-search";
+
+$fields_string="place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch,CURLOPT_POST, 1);
+curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
 curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
 $output = curl_exec($ch);
 curl_close($ch);
