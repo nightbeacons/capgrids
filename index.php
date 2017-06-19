@@ -36,6 +36,7 @@ $default_sectional = $sectionalAry['name'];
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
 //  document.getElementById('sectionalMenu').options[sectional].selected = true;
   document.getElementById('resources').src = 'resources.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
+  document.getElementById('nearest').src = 'nearestAirports.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
   }
 
   function printHandler() {
@@ -120,6 +121,23 @@ include_once("help/findcorners.php");
 include_once("help/resources.php");
 ?>
 </td></tr>
+
+
+
+
+
+<tr><td colspan="2"><hr></td></tr>
+<tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
+<IFRAME id="nearest" name="nearest" marginWidth=0 marginHeight=0 src="nearestAirports.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
+</td>
+<td valign="top" bgcolor="#fef0f0">
+<?php
+include_once("help/nearest.php");
+?>
+</td></tr>
+
+
+
 </table>
 <p style="margin-top: 0; margin-bottom: 0"></p>
 	<!-- ======================= -->
