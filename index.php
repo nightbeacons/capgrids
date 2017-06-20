@@ -82,7 +82,7 @@ drawSectionalOptions($default_sectional);
 <IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=<?php echo $default_sectional;?>" frameBorder=0 width=500 scrolling=no height=200></IFRAME>
 
 
-</td><td valign="top" width="200" bgcolor="#fef0f0">
+</td><td valign="top" width="240" bgcolor="#fef0f0">
 <?php
 include_once("help/searchgrid.php");
 ?>
@@ -94,7 +94,7 @@ include_once("help/searchgrid.php");
 
 <IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:10em;" ></IFRAME>
 </td>
-<td valign="top" bgcolor="#fef0f0">
+<td valign="top" bgcolor="#fef0f0" width-"240">
 <?php
 include_once("help/findgrid.php");
 ?>
@@ -107,7 +107,7 @@ include_once("help/findgrid.php");
 
 <IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 ></IFRAME>
 </td>
-<td valign="top" bgcolor="#fef0f0">
+<td valign="top" bgcolor="#fef0f0" width="240">
 <?php
 include_once("help/findcorners.php");
 ?>
@@ -116,7 +116,7 @@ include_once("help/findcorners.php");
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
 <IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
 </td>
-<td valign="top" bgcolor="#fef0f0">
+<td valign="top" bgcolor="#fef0f0" width="240">
 <?php
 include_once("help/resources.php");
 ?>
@@ -130,7 +130,7 @@ include_once("help/resources.php");
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
 <IFRAME id="nearest" name="nearest" marginWidth=0 marginHeight=0 src="nearestAirports.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
 </td>
-<td valign="top" bgcolor="#fef0f0">
+<td valign="top" bgcolor="#fef0f0" width="240">
 <?php
 include_once("help/nearest.php");
 ?>
