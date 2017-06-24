@@ -47,6 +47,8 @@ $abbrev=$coordinates[$sectional]['Abbrev'];
 div.printonly {
 	display: block;
 	visibility: hidden; 
+        margin:0pt 18pt 0pt 18pt;
+        padding:0;
 	}
 
 div.screenonly {
@@ -82,8 +84,14 @@ div.screenonly {
         opacity: 0.5;
         }
 
-
-
+@media print {
+  body {
+    margin: 0cm; 
+  }
+}
+@page {
+   margin: 0cm;
+}
     -->
   </style>
 
@@ -124,6 +132,8 @@ div.screenonly {
         } else {
         echo "<body $onload>\n";
         }
+
+//  Screen Display Below //
 
 echo "<div class=\"screenonly\">
 <form name=\"findCorners\">
@@ -193,15 +203,16 @@ echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\"
 <tr><td>&nbsp;</td><td align=\"center\" valign=\"middle\" style=\"border-width:2px;border-style:solid;width:" . $cellWidth . "px;height:80px;background-color:#f0f0f0;\">" . $coordinates[$sectional]['Abbrev'] . "<br>$selectedGrid $displayQuadrant<br><img src=\"/images/spacer.gif\" style=\"width:" . $cellWidth . "px;height:1px;\"></td><td width=\"$cellWidth\">&nbsp;</td></tr>
 <tr><td valign=\"top\" align=\"right\" class=\"coord\">" . $result['SW']['lat'] . "<br>" . $result['SW']['lon'] . "</td><td align=\"center\" valign=\"top\" class=\"coord\"><nobr><small><i>Mag Variation:</i></small></nobr><br><nobr><i>$variation&deg; $varDir</i></nobr></td><td valign=\"top\" align=\"left\" class=\"coord\">" . $result['SE']['lat'] . "<br>" . $result['SE']['lon'] . "</td></tr>
 </table></td></tr></table></div>\n";
-?>
 
-<!-- Printed Material -- not normally displayed onscreen -->
- 
+// End of Screen Display
+
+// Beginning of Print Display
+?>
 <div class="printonly">
 <table border="0" cellspacing="0" cellpadding="5" width="650" align="center">
-<tr valign="bottom"><td valign="middle" align="center"  rowspan="5">
+<tr valign="bottom"><td valign="middle" align="center"  rowspan="4">
 &larr;<br><?php echo $coordinates[$SurroundingGrids['West']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['West']['grid'] . $SurroundingGrids['West']['quadrant'];  ?></nobr> <br>&larr;</td><td align="center" colspan="3"><b><?php echo $coordinates[$sectional]['Abbrev'] . "&nbsp;" .  $selectedGrid . $displayQuadrant; ?></b></td>
-<td valign="middle" align="center"  rowspan="5">
+<td valign="middle" align="center"  rowspan="4">
 &rarr;<br><?php echo $coordinates[$SurroundingGrids['East']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['East']['grid'] . $SurroundingGrids['East']['quadrant'];  ?></nobr> <br>&rarr;</td></tr>
 <tr valign="bottom"><td align="left" class="coord" width="162"><?php echo $result['NW']['lat'] . "<br>" . $result['NW']['lon']; ?></td><td align="center" width="50%">&uarr;&nbsp;
 <?php echo $coordinates[$SurroundingGrids['North']['sectional']]['Abbrev'] . " " . $SurroundingGrids['North']['grid'] . $SurroundingGrids['North']['quadrant'];  ?> &nbsp;&uarr;</td><td align="right" class="coord" width="162"><?php echo $result['NE']['lat'] . "<br>" . $result['NE']['lon']; ?></td></tr>
@@ -234,24 +245,34 @@ echo "<iframe id=\"bottommap\" width=\"645\" height=\"680\" style=\"opacity:0.5;
 <tr valign="top"><td align="left" class="coord" width="162"><?php echo $result['SW']['lat'] . "<br>" . $result['SW']['lon']; ?></td>
 <td align="center">&darr;&nbsp;<?php echo $coordinates[$SurroundingGrids['South']['sectional']]['Abbrev'] . " " . $SurroundingGrids['South']['grid'] . $SurroundingGrids['South']['quadrant'];  ?> &nbsp;&darr;</td>
 <td align="right" class="coord" width="162"><?php echo $result['SE']['lat'] . "<br>" . $result['SE']['lon']; ?></td></tr>
+<!--
 <tr valign="top"><td align="center" class="coord" colspan="3"><i>Avg Mag Variation:</i></nobr><br><nobr><i><?php echo "$variation&deg; $varDir"; ?></i>
-
-
-<div style="float:left;width:33%;">
-<table style="display:inline;width:50%;" cellpadding=5 cellspacing=0 border="1"><tr><th>For:</th><th>Steer:</th></tr>
-<tr><td>North</td><td align="center"><?php echo $steer['North']; ?></td></tr>
-<tr><td>South</td><td align="center"><?php echo $steer['South']; ?></td></tr>
-</table>&nbsp;
-<table style="display:inline;width:50%;" cellpadding=5 cellspacing=0 border="1"><tr><th>For:</th><th>Steer:</th></tr>
-<tr><td>East</td><td align="center"><?php echo $steer['East']; ?></td></tr>
-<tr><td>West</td><td align="center"><?php echo $steer['West']; ?></td></tr>
+-->
+<tr><td rowspan="2">&nbsp;</td><td colspan="3"><hr>
+<div style="width:100%;display:inline;">
+<table style="margin-left:5%;display:inline-table;border-style:solid;" border="1" cellpadding="4" cellspacing="0">
+<tr><td><b>For:</b></td><td>North</td><td>East</td><td>South</td><td>West</td></tr>
+<tr><td><b>Steer:</b></td><td align="center"><?php echo $steer['North']; ?></td><td align="center"><?php echo $steer['East']; ?></td><td align="center"><?php echo $steer['South']; ?></td><td align="center"><?php echo $steer['West']; ?></td></tr>
 </table>
+<p style="display:inline; white-space:nowrap;margin-left:15%;"><i>Avg Mag Variation: <?php echo "$variation&deg; $varDir"; ?></i></p>
 </div>
+<hr>
+</td><td rowspan="2">&nbsp;</td></tr>
+<?php
+$nearestURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "nearestAirports.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
+
+$nearestURLencoded = rawurlencode($nearestURL);
+?>
+<tr><td colspan="3"><iframe id="nearest" width="645" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $nearestURL;?>"</iframe></td></tr>\n";
 
 </td></tr>
-
 </table>
 </div>
+<?php
+// End of Print Display
+?>
+
+
 </body>
 </html>
 <?php

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="/css/style.css" />
 <?php
 include_once("includes/gridFunctions.php");
 include_once("includes/simple_html_dom.php");
@@ -12,6 +12,7 @@ $airports = array();
 $sectional = $_GET['id'];
 $mygrid = $_GET['mygrid'];
 $myquadrant = $_GET['myquadrant'];
+$embed = (isset($_GET['embed']) ? $_GET['embed'] : 0);
 
 $result = grid2lonlat($sectional,$mygrid, $myquadrant, "raw");
 $abbrev = $coordinates[$sectional]['Abbrev'];
@@ -20,9 +21,35 @@ $gridLabel = "$abbrev $mygrid";
   $gridLabel .= "-" . $myquadrant;
   }
 
+echo "<style type=\"text/css\">\n";
+  if ($embed) {
+  echo "div.nearestApt {
+          font-size: 10pt;
+          font-color: black;
+          margin:0;
+          padding:0;
+       }
+       a.nearestApt {
+          text-decoration: none;
+          color: black;
+        }
+        p.noprint {
+          display:none;
+        }
+        h2.nearest {
+        font-size:12pt;
+        margin-top: 0;
+        color:black;
+        }"; 
+  }
+
+echo "</style>\n";
+echo "</head>
+<body style=\"margin:0;\">";
+
 $latGridCenter = ($result['NW']['lat'] + $result['SW']['lat'])/2;
 $lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
-echo "<h2 class=\"main\">Nearest airports to $gridLabel</h2><p style=\"margin-top:0\"><i>Source: <a href=\"http://www.airnav.com\" target=\"_blank\">Airnav.com</a></i></p>";
+echo "<h2 class=\"main nearest\">Nearest airports to $gridLabel</h2><p class=\"noprint\" style=\"margin-top:0\"><i>Source: <a href=\"http://www.airnav.com\" target=\"_blank\">Airnav.com</a></i></p>";
 // echo "<p>Center at $latGridCenter x $lonGridCenter</p>";
 
 // http://airnav.com/cgi-bin/airport-search?place=&airportid=&lat=44.654&NS=N&lon=122.765&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=20&distanceunits=nm
@@ -55,11 +82,10 @@ foreach($html->find('tr') as $row) {
     }
 }
 echo "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">
-      <tr><th>Code</th><th>Name</th><th>City</th><th>Distance</th></tr>\n";
+      <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th><div class=\"nearestApt\">City</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
    for ($i=0; $i<=4; $i++){
-   echo "<tr><td><a href=\"" . $airports[$i]['link'] . "\" target=\"_blank\">" . $airports[$i]['code'] . "</a></td><td>" . $airports[$i]['name'] . "</td><td>" . $airports[$i]['city'] . "</td><td>" . $airports[$i]['distance'] . "</td></tr>\n";
+   echo "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"" . $airports[$i]['link'] . "\" target=\"_blank\">" . $airports[$i]['code'] . "</a></div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['city'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
    }
 echo "</table>";
 ?>
 </body>
-</results>
