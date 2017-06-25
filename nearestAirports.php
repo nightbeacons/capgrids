@@ -49,7 +49,7 @@ echo "</head>
 
 $latGridCenter = ($result['NW']['lat'] + $result['SW']['lat'])/2;
 $lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
-echo "<h2 class=\"main nearest\">Nearest airports to $gridLabel</h2><p class=\"noprint\" style=\"margin-top:0\"><i>Source: <a href=\"http://www.airnav.com\" target=\"_blank\">Airnav.com</a></i></p>";
+echo "<h2 class=\"main nearest\">Nearest airports to center of $gridLabel</h2><p class=\"noprint\" style=\"margin-top:0\"><i>Source: <a href=\"http://www.airnav.com\" target=\"_blank\">Airnav.com</a></i></p>";
 // echo "<p>Center at $latGridCenter x $lonGridCenter</p>";
 
 // http://airnav.com/cgi-bin/airport-search?place=&airportid=&lat=44.654&NS=N&lon=122.765&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=20&distanceunits=nm
