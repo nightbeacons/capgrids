@@ -13,6 +13,7 @@ $default_sectional = $sectionalAry['name'];
 <title>CAPgrids | Civil Air Patrol Emergency Services</title>
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
 <meta name="description" 
 	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams. The Swiss Army Knife of Search Grids, it can calculate grid corners and grid identifiers for any US Sectional chart. It also provides adjustable maps, and large map printouts."">
 <meta name="keywords" 

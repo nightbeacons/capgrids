@@ -21,7 +21,8 @@ $gridLabel = "$abbrev $mygrid";
   $gridLabel .= "-" . $myquadrant;
   }
 
-echo "<style type=\"text/css\">\n";
+echo "<link href=\"https://fonts.googleapis.com/css?family=Roboto+Condensed\" rel=\"stylesheet\">
+<style type=\"text/css\">\n";
   if ($embed) {
   echo "div.nearestApt {
           font-size: 10pt;

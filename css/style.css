@@ -230,9 +230,10 @@ div.bannerOverlay{
 }
 
 h2.main {
-  font-family: Arial;
+/*  font-family: Arial;  */
+  font-family: 'Roboto Condensed', sans-serif;
   color:#CC3300;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 600;
   margin-bottom: 4px;
 }
@@ -260,3 +261,11 @@ background: -moz-linear-gradient(right,  rgba(162,191,214,1) 0%, rgba(255,255,25
 background: -webkit-linear-gradient(rightt,  rgba(162,191,214,1) 0%,rgba(255,255,255,0) 100%); /* Chrome10-25,Safari5.1-6 */
 background: linear-gradient(to left,  rgba(162,191,214,1) 0%,rgba(255,255,255,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#a2bfd6',GradientType=1 ); /* IE6-9 */}
+
+@media print {
+
+h2.nearest {
+font-size: 14pt;
+color: black;
+
+}

@@ -101,6 +101,7 @@ function changeOpacity(){
 
 
 <link rel="stylesheet" href="css/jquery-ui.css" />
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
 <link rel="stylesheet" href="css/style.css" />
 
   <style type="text/css">
