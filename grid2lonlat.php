@@ -121,7 +121,10 @@ div.screenonly {
 	var op2 = 1 - op1;
 	document.getElementById('topmap').style.opacity    = op1;
 	document.getElementById('bottommap').style.opacity = op2;
+  }
 
+  function resizeIframe(obj) {
+    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
   }
   </script>
 
@@ -239,32 +242,24 @@ $iframeHref = "http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;ge
 
 echo "<iframe id=\"topmap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $TerrainMapiframeSrc . "\"></iframe>";
 echo "<iframe id=\"bottommap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $SatMapiframeSrc . "\"></iframe>";
+$nearestURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "nearestAirports.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
+$nearestURLencoded = rawurlencode($nearestURL);
+
 ?>
 </div>
 </td></tr>
 <tr valign="top"><td align="left" class="coord" width="162"><?php echo $result['SW']['lat'] . "<br>" . $result['SW']['lon']; ?></td>
 <td align="center">&darr;&nbsp;<?php echo $coordinates[$SurroundingGrids['South']['sectional']]['Abbrev'] . " " . $SurroundingGrids['South']['grid'] . $SurroundingGrids['South']['quadrant'];  ?> &nbsp;&darr;</td>
 <td align="right" class="coord" width="162"><?php echo $result['SE']['lat'] . "<br>" . $result['SE']['lon']; ?></td></tr>
-<!--
-<tr valign="top"><td align="center" class="coord" colspan="3"><i>Avg Mag Variation:</i></nobr><br><nobr><i><?php echo "$variation&deg; $varDir"; ?></i>
--->
-<tr><td rowspan="2">&nbsp;</td><td colspan="3"><hr>
-<div style="width:100%;display:inline;">
-<table style="margin-left:5%;display:inline-table;border-style:solid;" border="1" cellpadding="4" cellspacing="0">
-<tr><td><b>For:</b></td><td>North</td><td>East</td><td>South</td><td>West</td></tr>
-<tr><td><b>Steer:</b></td><td align="center"><?php echo $steer['North']; ?></td><td align="center"><?php echo $steer['East']; ?></td><td align="center"><?php echo $steer['South']; ?></td><td align="center"><?php echo $steer['West']; ?></td></tr>
-</table>
-<p style="display:inline; white-space:nowrap;margin-left:15%;"><i>Avg Mag Variation: <?php echo "$variation&deg; $varDir"; ?></i></p>
-</div>
+<tr><td rowspan="2" style="background-color:#fffff;">&nbsp;</td><td colspan="3" style="vertical-align:top;"><hr>
+   <table style="margin-left:0;margin-top:2em;display:inline-table;border-style:solid;" border="1" cellpadding="4" cellspacing="0">
+   <caption style="caption-side:bottom;margin-top:0.4em;"><i>Avg Mag Variation: <?php echo "$variation&deg; $varDir"; ?></i></caption>
+   <tr><td><b>For:</b></td><td>North</td><td>East</td><td>South</td><td>West</td></tr>
+   <tr><td><b>Steer:</b></td><td align="center"><?php echo $steer['North']; ?></td><td align="center"><?php echo $steer['East']; ?></td><td align="center"><?php echo $steer['South']; ?></td><td align="center"><?php echo $steer['West']; ?></td></tr>
+   </table>
+<table style="float:right;display:inline-table;width:400px;margin:0;" border="0"><tr><td style="width:100%;"><iframe style="width:100%;" id="nearest" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" onload="resizeIframe(this)" src="<?php echo $nearestURL;?>"</iframe></td></tr></table>
 <hr>
 </td><td rowspan="2">&nbsp;</td></tr>
-<?php
-$nearestURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "nearestAirports.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
-
-$nearestURLencoded = rawurlencode($nearestURL);
-?>
-<tr><td colspan="3"><iframe id="nearest" width="645" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $nearestURL;?>"</iframe></td></tr>\n";
-
 </td></tr>
 </table>
 </div>
