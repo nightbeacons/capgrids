@@ -288,7 +288,7 @@ $defaultVal=strtoupper(trim(preg_replace("/ /", "_", $defaultVal)));
 
 	while (list($sectional, $info) = each($coordinates)) {
 	$SELECTED="";
-		if ($sectional == $defaultVal) $SELECTED=" SELECTED ";
+		if ($sectional == $defaultVal) $SELECTED=" selected=\"SELECTED\" ";
 	$displayName = ucwords(strtolower(preg_replace("/_/"," ", $sectional)));
 	if ($sectional != "None") $output .= "	<option value=\"$sectional\" id=\"$sectional\" $SELECTED>$displayName</option>\n";
 	}
