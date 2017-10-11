@@ -3,6 +3,9 @@ include_once("includes/gridFunctions.php");
 
 $sectionalAry = ourSectional();
 $default_sectional = $sectionalAry['name'];
+   if ($sectionalAry['name'] == 'None'){
+   $default_sectional = "SEATTLE";
+   }
 //$default_sectional = "SEATTLE";
 ?>
 <!DOCTYPE html>
