@@ -1,6 +1,6 @@
 <?php
 # Grid Functions
-
+date_default_timezone_set("UTC"); 
 include_once("coordinates.php");
 
 # ============================================== Globals ===========================================
@@ -600,6 +600,162 @@ return ($SurroundingGrids);
 }
 
 # ===================================================================================================
+/**
+ * function gc_distance($lat1, $lon1, $lat2, $lon2)
+ * Calculates great-circle distance between two lat/lon coordinates
+ *   Input: lat/lon coordinates
+ *   Return:  Assoc. array of distances (Miles, NM, KM)
+ */
+function gc_distance($lat1, $lon1, $lat2, $lon2) {
+   $distance = array();
+   $theta = $lon1 - $lon2;
+   $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+   $dist = acos($dist);
+   $dist = rad2deg($dist);
+   $miles = $dist * 60 * 1.1515;
+
+   $distance['miles'] = $miles;
+   $distance['km']    = $miles * 1.609344;
+   $distance['nm']    = $miles * 0.8684;
+   return ($distance);
+}
+
+/**
+ * getRhumLineBearing()
+ *   Input: Two lon/lat coordinate pairs, decimal degrees
+ *   Output: MAGNETIC heading from coordinate #1 to coordinate #2
+ */
+
+function getRhumbLineBearing($lat1, $lon1, $lat2, $lon2) {
+   //difference in longitudinal coordinates
+   $dLon = deg2rad($lon2) - deg2rad($lon1);
+
+   //difference in the phi of latitudinal coordinates
+   $dPhi = log(tan(deg2rad($lat2) / 2 + pi() / 4) / tan(deg2rad($lat1) / 2 + pi() / 4));
+
+   //we need to recalculate $dLon if it is greater than pi
+   if(abs($dLon) > pi()) {
+      if($dLon > 0) {
+         $dLon = (2 * pi() - $dLon) * -1;
+      }
+      else {
+         $dLon = 2 * pi() + $dLon;
+      }
+   }
+
+   $magneticVariation = magVariation($lat1, $lon1);
+
+   // Normalized angle, and convert TRUE to MAGNETIC
+   $angle = (rad2deg(atan2($dLon, $dPhi)) + 360 + $magneticVariation) % 360;
+
+   //return the angle, normalized
+   return ($angle);
+}
+
+
+
+function getCompassDirection($bearing) {
+   $tmp = round($bearing / 22.5);
+   switch($tmp) {
+      case 1:
+         $direction = "NNE";
+         break;
+      case 2:
+         $direction = "NE";
+         break;
+      case 3:
+         $direction = "ENE";
+         break;
+      case 4:
+         $direction = "E";
+         break;
+      case 5:
+         $direction = "ESE";
+         break;
+      case 6:
+         $direction = "SE";
+         break;
+      case 7:
+         $direction = "SSE";
+         break;
+      case 8:
+         $direction = "S";
+         break;
+      case 9:
+         $direction = "SSW";
+         break;
+      case 10:
+         $direction = "SW";
+         break;
+      case 11:
+         $direction = "WSW";
+         break;
+      case 12:
+         $direction = "W";
+         break;
+      case 13:
+         $direction = "WNW";
+         break;
+      case 14:
+         $direction = "NW";
+         break;
+      case 15:
+         $direction = "NNW";
+         break;
+      default:
+         $direction = "N";
+   }
+   return $direction;
+}
+
+
+
+/**
+ * GetCivilTwilight($lat, $lon)
+ * 
+ *  Calculate the current Civil Twilight times for the given lat/lon
+ *    Input: Lat & Lon as float (such as -114.984628)
+ *    Output:  Array
+ */
+
+function GetCivilTwilight($lat, $lon) {
+
+$googleAPIkey = "AIzaSyB6m73beXLhQ6LicDE1x0kydJuejAndpIo";
+// zenith value set to 96 for civil twilight times
+$zenith       = 96;    
+$twilight = array();
+
+// Get TZ offset (including DST adjustments) for current lat + lon.  
+$url = "https://maps.googleapis.com/maps/api/timezone/json?location=" . $lat . "," . $lon . "&timestamp=" . time() . "&key=" . $googleAPIkey;
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);    // Timeout in 4 seconds
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+$output = curl_exec($ch);
+curl_close($ch);
+
+
+$tzInfo = json_decode($output);
+$gmtOffset=($tzInfo->rawOffset) / 3600;
+$timeZoneName = $tzInfo->timeZoneName;
+$tz_pattern = '/(?<=\s|^)[a-z]/i';
+preg_match_all($tz_pattern, $timeZoneName, $matches);
+$timeZoneAbbrev = strtoupper(implode('', $matches[0]));
+
+
+$twilight['sunrise_GMT']     = date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, 0);
+$twilight['sunrise_Local']   = date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, $gmtOffset);
+$twilight['sunset_GMT']      = date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, 0);
+$twilight['sunset_Local']    = date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, $gmtOffset);
+$twilight['timeZoneName']    = $timeZoneName;
+$twilight['timeZoneAbbrev']  = $timeZoneAbbrev;
+
+return($twilight);
+}
 
 
 ?>
