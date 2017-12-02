@@ -5,10 +5,6 @@
 # MaxLon = Longitude of the western-most boundary
 # MinLat = Latitude of the southern-most boundary
 # MaxLat = Latitude of the northern-most boundary
-# startGrid = Beginning grid number. (Normally 1)
-# endGrid   = Ending grid number
-# nullgrid = array of grid numbers that do not exist for that sectional
-#            Example: Grid numbers 1, 2, 3, and 4 do not exist on the PHX sectional
 
 # Verified:
 # SEA
@@ -399,7 +395,7 @@ $coordinates = array (
 	     "MaxLat" => "40",
 	     "startGrid" => "1",
 	     "endGrid"  => "448"
-	),
+	)
 	
 );
 
