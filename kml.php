@@ -68,43 +68,54 @@ $filenameHeader = "Content-Disposition: attachment; filename=\"" .$abbrev . "_" 
 
 #echo "Lon: $gridLon    Lat: $gridLat    $abbrev - $mygrid \n";
 
-if ($embed) {
+   if ($embed) {
 
-if ($myquadrant == "E") {
-$nw_coord = ($gridLon)  . ","       . ($gridLat) . ",0";
-$ne_coord = ($gridLon + 0.25) . "," . ($gridLat) . ",0";
-$se_coord = ($gridLon + 0.25) . "," . ($gridLat - 0.25) . ",0";
-$sw_coord = ($gridLon) . ","        . ($gridLat - 0.25) . ",0";
-} else {
-$nw_coord = ($gridLon)  . ","       . ($gridLat) . ",0";
-$ne_coord = ($gridLon + 0.125) . "," . ($gridLat) . ",0";
-$se_coord = ($gridLon + 0.125) . "," . ($gridLat - 0.125) . ",0";
-$sw_coord = ($gridLon) . ","        . ($gridLat - 0.125) . ",0";
-}
+      if ($myquadrant == "E") {
+      $nw_coord = ($gridLon)  . ","       . ($gridLat) . ",0";
+      $ne_coord = ($gridLon + 0.25) . "," . ($gridLat) . ",0";
+      $se_coord = ($gridLon + 0.25) . "," . ($gridLat - 0.25) . ",0";
+      $sw_coord = ($gridLon) . ","        . ($gridLat - 0.25) . ",0";
+      } else {
+      $nw_coord = ($gridLon)  . ","       . ($gridLat) . ",0";
+      $ne_coord = ($gridLon + 0.125) . "," . ($gridLat) . ",0";
+      $se_coord = ($gridLon + 0.125) . "," . ($gridLat - 0.125) . ",0";
+      $sw_coord = ($gridLon) . ","        . ($gridLat - 0.125) . ",0";
+      }
 
 $buffer="<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<kml xmlns=\"http://earth.google.com/kml/2.2\">
+<kml xmlns=\"http://www.opengis.net/kml/2.2\" xmlns:gx=\"http://www.google.com/kml/ext/2.2\" xmlns:kml=\"http://www.opengis.net/kml/2.2\" xmlns:atom=\"http://www.w3.org/2005/Atom\">
 <Document>
-        <name>CAP Search Grids for $gridLabel</name>
-        <open>1</open>
-        <description><![CDATA[CAP Conventional Search Grids covering the $abbrev - $mygrid  Sectional Chart<br><br>
+    <name>CAP Search Grids for $gridLabel</name>
+    <open>1</open>
+    <description><![CDATA[CAP Conventional Search Grids covering the $abbrev - $mygrid  Sectional Chart<br><br>
 By Capt Charles Jackson<br>nightbeacons@gmail.com<br>
 based on original work by<br>
 2Lt Landis Bennett, CAP<br>
 landis@mac.com]]></description>
-<Placemark>
-<name>Polyline 1</name>
-    <description> xx</description>
-    <Style>
-      <LineStyle>
-        <color>88000000</color>
-        <width>3</width>
-      </LineStyle>
+    <Style id=\"s_ylw-pushpin_hl\">
+        <IconStyle>
+            <color>ff00aa55</color>
+            <scale>1.0</scale>
+            <Icon>
+                <href>https://" .  $_SERVER['SERVER_NAME'] . "/images/markers/foo.png</href>
+            </Icon>
+        </IconStyle>
+        <LabelStyle>
+            <color>807fffff</color>
+        </LabelStyle>
+        <LineStyle>
+            <color>88000000</color>
+            <width>3</width>
+        </LineStyle>
     </Style>
-    <LineString>
-      <coordinates>$nw_coord $ne_coord $se_coord $sw_coord $nw_coord</coordinates>
-    </LineString>
-  </Placemark>
+
+    <Placemark>
+        <name>Polyline 1</name>
+        <description> xx</description>
+        <LineString>
+            <coordinates>$nw_coord $ne_coord $se_coord $sw_coord $nw_coord</coordinates>
+        </LineString>
+    </Placemark>
 </Document>
 </kml>";
 

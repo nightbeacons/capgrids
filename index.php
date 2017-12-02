@@ -6,7 +6,9 @@ $default_sectional = $sectionalAry['name'];
    if ($sectionalAry['name'] == 'None'){
    $default_sectional = "SEATTLE";
    }
-//$default_sectional = "SEATTLE";
+//echo "<pre>";
+//print_r($sectionalAry);
+//echo "</pre>";
 ?>
 <!DOCTYPE html>
 <html>
@@ -14,6 +16,11 @@ $default_sectional = $sectionalAry['name'];
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="en-us">
 <title>CAPgrids | Civil Air Patrol Emergency Services</title>
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//www.ngdc.noaa.gov">
+<link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="dns-prefetch" href="//maps.googleapis.com">
+
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
@@ -40,7 +47,7 @@ $default_sectional = $sectionalAry['name'];
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
 //  document.getElementById('sectionalMenu').options[sectional].selected = true;
   document.getElementById('resources').src = 'resources.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
-  document.getElementById('nearest').src = 'nearestAirports.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
+  document.getElementById('nearest').src = 'nearestAirportsCJ.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
   }
 
   function printHandler() {

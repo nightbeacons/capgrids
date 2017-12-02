@@ -201,6 +201,8 @@ $steer = array("North" => sprintf("%03d", floor($northSteer + 0.5)),
                "West"  => floor(270 + $variationSigned + 0.5)
          );
 
+$CTwilight = GetCivilTwilight($avgLat, $avgLon);
+
 echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\" align=\"center\" style=\"border-width:10px;border-style:solid;border-color:#c0c0c0;\"><tr><td><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\" align=\"center\">
 <tr><td width=\"$cellWidth\" valign=\"bottom\" align=\"right\" class=\"coord\">" . $result['NW']['lat'] . "<br>" . $result['NW']['lon'] . "</td><td width=\"($cellWidth + 75)\">&nbsp;</td><td valign=\"bottom\" align=\"left\" width=\"$cellWidth\" class=\"coord\">" . $result['NE']['lat'] . "<br>" . $result['NE']['lon'] . "</td></tr>
 <tr><td>&nbsp;</td><td align=\"center\" valign=\"middle\" style=\"border-width:2px;border-style:solid;width:" . $cellWidth . "px;height:80px;background-color:#f0f0f0;\">" . $coordinates[$sectional]['Abbrev'] . "<br>$selectedGrid $displayQuadrant<br><img src=\"/images/spacer.gif\" style=\"width:" . $cellWidth . "px;height:1px;\"></td><td width=\"$cellWidth\">&nbsp;</td></tr>
@@ -220,29 +222,29 @@ echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\"
 <tr valign="bottom"><td align="left" class="coord" width="162"><?php echo $result['NW']['lat'] . "<br>" . $result['NW']['lon']; ?></td><td align="center" width="50%">&uarr;&nbsp;
 <?php echo $coordinates[$SurroundingGrids['North']['sectional']]['Abbrev'] . " " . $SurroundingGrids['North']['grid'] . $SurroundingGrids['North']['quadrant'];  ?> &nbsp;&uarr;</td><td align="right" class="coord" width="162"><?php echo $result['NE']['lat'] . "<br>" . $result['NE']['lon']; ?></td></tr>
 <tr valign="top"><td align="center" colspan="3"><div style="position: relative;"><img src="images/spacer.gif" width="645" height="690"><?php
-$kmlURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
+$kmlURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
 
 $kmlURLencoded = rawurlencode($kmlURL);
 $zoom=12;
 if ($selectedQuadrant=="E") $zoom=11;
 
-//$TerrainMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
+//$TerrainMapiframeBase= "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
 //$TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
 
-$TerrainMapiframeSrc = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=TERRAIN&embed=1";
+$TerrainMapiframeSrc = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=TERRAIN&embed=1";
 
-$SatMapiframeBase= "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
+$SatMapiframeBase= "https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
 $SatMapiframeSrc  = $SatMapiframeBase .  "&amp;z=" . $zoom;
 
-$SatMapiframeSrc  = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=HYBRID&embed=1";
+$SatMapiframeSrc  = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=HYBRID&embed=1";
 
 
-#$iframeSrc = "http://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=" . $zoom . "&amp;output=embed";
-$iframeHref = "http://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=10";
+#$iframeSrc = "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=" . $zoom . "&amp;output=embed";
+$iframeHref = "https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=10";
 
 echo "<iframe id=\"topmap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $TerrainMapiframeSrc . "\"></iframe>";
 echo "<iframe id=\"bottommap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $SatMapiframeSrc . "\"></iframe>";
-$nearestURL = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "nearestAirports.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
+$nearestURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "nearestAirports.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
 $nearestURLencoded = rawurlencode($nearestURL);
 
 ?>
@@ -251,12 +253,16 @@ $nearestURLencoded = rawurlencode($nearestURL);
 <tr valign="top"><td align="left" class="coord" width="162"><?php echo $result['SW']['lat'] . "<br>" . $result['SW']['lon']; ?></td>
 <td align="center">&darr;&nbsp;<?php echo $coordinates[$SurroundingGrids['South']['sectional']]['Abbrev'] . " " . $SurroundingGrids['South']['grid'] . $SurroundingGrids['South']['quadrant'];  ?> &nbsp;&darr;</td>
 <td align="right" class="coord" width="162"><?php echo $result['SE']['lat'] . "<br>" . $result['SE']['lon']; ?></td></tr>
-<tr><td rowspan="2" style="background-color:#fffff;">&nbsp;</td><td colspan="3" style="vertical-align:top;"><hr>
-   <table style="margin-left:0;margin-top:2em;display:inline-table;border-style:solid;" border="1" cellpadding="4" cellspacing="0">
+<tr><td rowspan="2" style="background-color:#fffff;">&nbsp;</td><td colspan="3" style="vertical-align:top;background-color:yellow;"><hr>
+<div style="font-size:9.0pt;font-family:arial;margin-left:0;margin-top:0;display:inline-table;">
+   <table style="width:224px;margin-left:0;margin-top:2em;display:inline-table;border-style:solid;position:relative;" border="1" cellpadding="4" cellspacing="0">
    <caption style="caption-side:bottom;margin-top:0.4em;"><i>Avg Mag Variation: <?php echo "$variation&deg; $varDir"; ?></i></caption>
    <tr><td><b>For:</b></td><td>North</td><td>East</td><td>South</td><td>West</td></tr>
    <tr><td><b>Steer:</b></td><td align="center"><?php echo $steer['North']; ?></td><td align="center"><?php echo $steer['East']; ?></td><td align="center"><?php echo $steer['South']; ?></td><td align="center"><?php echo $steer['West']; ?></td></tr>
    </table>
+<table border="0" style="margin-top:2em;width:224px;" cellspacing="0" cellpadding="2"><tr><td><p style="padding:0;margin:0;">Start of AM Civil Twilight:</p></td><td><?php echo "<p style=\"padding:0;margin:0;white-space:nowrap\">" . $CTwilight['sunrise_Local'] . " " . $CTwilight['timeZoneAbbrev'];?></p></td></tr>
+<tr><td><p style="padding:0;margin:0;">End of PM Civil Twilight:</p></td><td><?php echo "<p  style=\"white-space:nowrap;padding:0;margin:0;\">" . $CTwilight['sunset_Local'] . " " . $CTwilight['timeZoneAbbrev'];?></p></td></tr></table>
+</div>
 <table style="float:right;display:inline-table;width:400px;margin:0;" border="0"><tr><td style="width:100%;"><iframe style="width:100%;" id="nearest" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" onload="resizeIframe(this)" src="<?php echo $nearestURL;?>"</iframe></td></tr></table>
 <hr>
 </td><td rowspan="2">&nbsp;</td></tr>

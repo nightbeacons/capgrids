@@ -25,10 +25,11 @@ echo "<link href=\"https://fonts.googleapis.com/css?family=Roboto+Condensed\" re
 <style type=\"text/css\">\n";
   if ($embed) {
   echo "div.nearestApt {
-          font-size: 10pt;
+          font-size: 8.5pt;
           font-color: black;
           margin:0;
           padding:0;
+          line-height:1;
        }
        a.nearestApt {
           text-decoration: none;
@@ -50,9 +51,9 @@ echo "</head>
 
 $latGridCenter = ($result['NW']['lat'] + $result['SW']['lat'])/2;
 $lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
-echo "<h2 class=\"main nearest\">Nearest airports to center of $gridLabel</h2><p class=\"noprint\" style=\"margin-top:0\"><i>Source: <a href=\"http://www.airnav.com\" target=\"_blank\">Airnav.com</a></i></p>";
-// echo "<p>Center at $latGridCenter x $lonGridCenter</p>";
 
+//echo "<pre>";
+//echo "lat = $latGridCenter <br> lon = $lonGridCenter<br></pre>";
 // http://airnav.com/cgi-bin/airport-search?place=&airportid=&lat=44.654&NS=N&lon=122.765&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=20&distanceunits=nm
 // $url = "http://www.airnav.com/cgi-bin/airport-search?place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
 
@@ -75,18 +76,40 @@ foreach($html->find('tr') as $row) {
   $airports[$cnt]['link'] = preg_replace('/.*<a href="(.*?)".*/', 'https://www.airnav.com$1', $row);
     if (strpos($airports[$cnt]['link'], "https://") !== FALSE) {
     $ary = preg_split("/<td.*?>/", $row);
-    $airports[$cnt]['code'] = preg_replace("/<i>(.*?)&nbsp.*/", "$1", $ary[1]);
-    $airports[$cnt]['city'] = preg_replace("/<i>(.*?)&nbsp.*/", "$1", $ary[2]);
-    $airports[$cnt]['name'] = preg_replace("/<i>(.*?)&nbsp.*/", "$1", $ary[3]);
+    $airports[$cnt]['code'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[1]);
+    $airports[$cnt]['city'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[2]);
+    $airports[$cnt]['name'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[3]);
     $airports[$cnt]['distance'] =  preg_replace("/(.*?)<br>.*/",     "$1", $ary[4]);
     $cnt++;
+
     }
 }
-echo "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">
-      <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th><div class=\"nearestApt\">City</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
-   for ($i=0; $i<=4; $i++){
-   echo "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"" . $airports[$i]['link'] . "\" target=\"_blank\">" . $airports[$i]['code'] . "</a></div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['city'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
-   }
-echo "</table>";
+$html = "<h2 class=\"main nearest\">Nearest airports to center of $gridLabel</h2>";
+
+  if ($embed){
+     //  Code for PRINT version
+    $html .= "<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\">
+      <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
+       for ($i=0; $i<=4; $i++){
+          if (isset($airports[$i]['code'])){
+            $html .= "<tr><td><div class=\"nearestApt\">" . $airports[$i]['code'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "<br><small><i>" . $airports[$i]['city'] . "</i></small></div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
+          }
+       }
+    $html .= "</table>";
+
+  } else {
+
+    // Code for DISPLAY version
+    $html .= "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">
+      <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th class=\"noprint\"><div class=\"nearestApt\">City</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
+       for ($i=0; $i<=4; $i++){
+          if (isset($airports[$i]['code'])){
+            $html .= "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"" . $airports[$i]['link'] . "\" target=\"_blank\">" . $airports[$i]['code'] . "</a></div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['city'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
+          }
+       }
+    $html .=  "</table>";
+  }
+
+echo $html;
 ?>
 </body>
