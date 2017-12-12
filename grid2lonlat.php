@@ -253,7 +253,7 @@ $nearestURLencoded = rawurlencode($nearestURL);
 <tr valign="top"><td align="left" class="coord" width="162"><?php echo $result['SW']['lat'] . "<br>" . $result['SW']['lon']; ?></td>
 <td align="center">&darr;&nbsp;<?php echo $coordinates[$SurroundingGrids['South']['sectional']]['Abbrev'] . " " . $SurroundingGrids['South']['grid'] . $SurroundingGrids['South']['quadrant'];  ?> &nbsp;&darr;</td>
 <td align="right" class="coord" width="162"><?php echo $result['SE']['lat'] . "<br>" . $result['SE']['lon']; ?></td></tr>
-<tr><td rowspan="2" style="background-color:#fffff;">&nbsp;</td><td colspan="3" style="vertical-align:top;background-color:yellow;"><hr>
+<tr><td rowspan="2" style="background-color:#fffff;">&nbsp;</td><td colspan="3" style="vertical-align:top;"><hr>
 <div style="font-size:9.0pt;font-family:arial;margin-left:0;margin-top:0;display:inline-table;">
    <table style="width:224px;margin-left:0;margin-top:2em;display:inline-table;border-style:solid;position:relative;" border="1" cellpadding="4" cellspacing="0">
    <caption style="caption-side:bottom;margin-top:0.4em;"><i>Avg Mag Variation: <?php echo "$variation&deg; $varDir"; ?></i></caption>
