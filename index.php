@@ -47,7 +47,7 @@ $default_sectional = $sectionalAry['name'];
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
 //  document.getElementById('sectionalMenu').options[sectional].selected = true;
   document.getElementById('resources').src = 'resources.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
-  document.getElementById('nearest').src = 'nearestAirportsCJ.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
+  document.getElementById('nearest').src = 'nearestAirports.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
   }
 
   function printHandler() {

@@ -6,9 +6,21 @@
 <?php
 include_once("includes/gridFunctions.php");
 include_once("includes/simple_html_dom.php");
-$SELF= $_SERVER['PHP_SELF'];
-$airports = array();
+include_once("/var/www/dev.capgrids/pwf/apt.php");
 
+$cmd = "stat --format=%Z " .  $_SERVER['DOCUMENT_ROOT'] . "/data";
+$dataLastModified = date("j-M-Y", trim(`$cmd`));
+
+$SELF= $_SERVER['PHP_SELF'];
+
+$db =  new mysqli($dbserver, $dbuser, $dbpass, $dbname);
+  if (mysqli_connect_errno()){
+  printf("Connection failed: %s\n", mysqli_connect_error());
+  exit();
+  }
+
+$airports = array();
+$numAirports = 5;
 $sectional = $_GET['id'];
 $mygrid = $_GET['mygrid'];
 $myquadrant = $_GET['myquadrant'];
@@ -20,6 +32,11 @@ $gridLabel = "$abbrev $mygrid";
   if ($myquadrant != "E") {
   $gridLabel .= "-" . $myquadrant;
   }
+
+$latGridCenter = ($result['NW']['lat'] + $result['SW']['lat'])/2;
+$lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
+
+$airports = getNearestAirports($latGridCenter, $lonGridCenter, 100, $numAirports);
 
 echo "<link href=\"https://fonts.googleapis.com/css?family=Roboto+Condensed\" rel=\"stylesheet\">
 <style type=\"text/css\">\n";
@@ -42,58 +59,23 @@ echo "<link href=\"https://fonts.googleapis.com/css?family=Roboto+Condensed\" re
         font-size:12pt;
         margin-top: 0;
         color:black;
-        }"; 
+        }";
   }
 
 echo "</style>\n";
 echo "</head>
 <body style=\"margin:0;\">";
 
-$latGridCenter = ($result['NW']['lat'] + $result['SW']['lat'])/2;
-$lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
-
-//echo "<pre>";
-//echo "lat = $latGridCenter <br> lon = $lonGridCenter<br></pre>";
-// http://airnav.com/cgi-bin/airport-search?place=&airportid=&lat=44.654&NS=N&lon=122.765&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=20&distanceunits=nm
-// $url = "http://www.airnav.com/cgi-bin/airport-search?place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
-
-$url = "http://www.airnav.com/cgi-bin/airport-search";
-
-$fields_string="place=&airportid=&lat=" . $latGridCenter . "&NS=N&lon=" . $lonGridCenter . "&EW=W&fieldtypes=a&fieldtypes=g&use=u&use=r&use=m&iap=0&length=&fuel=0&mindistance=0&maxdistance=50&distanceunits=nm";
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch,CURLOPT_POST, 1);
-curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
-curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
-$output = curl_exec($ch);
-curl_close($ch);
-
-$results = preg_replace("|.*?<H1>Airport Search Results</H1>.*?(<TABLE.*?</TABLE>).*|s", '$1', $output);
-$html = str_get_html($results);
-$cnt=0;
-foreach($html->find('tr') as $row) {
-  $airports[$cnt]['link'] = preg_replace('/.*<a href="(.*?)".*/', 'https://www.airnav.com$1', $row);
-    if (strpos($airports[$cnt]['link'], "https://") !== FALSE) {
-    $ary = preg_split("/<td.*?>/", $row);
-    $airports[$cnt]['code'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[1]);
-    $airports[$cnt]['city'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[2]);
-    $airports[$cnt]['name'] = preg_replace("/(<i>)?(.*?)&nbsp.*/", "$2", $ary[3]);
-    $airports[$cnt]['distance'] =  preg_replace("/(.*?)<br>.*/",     "$1", $ary[4]);
-    $cnt++;
-
-    }
-}
-$html = "<h2 class=\"main nearest\">Nearest airports to center of $gridLabel</h2>";
+$html = "<h2 class=\"main nearest\">Nearest Airports to Center of $gridLabel</h2>";
 
   if ($embed){
      //  Code for PRINT version
     $html .= "<table border=\"1\" cellpadding=\"2\" cellspacing=\"0\">
       <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
-       for ($i=0; $i<=4; $i++){
-          if (isset($airports[$i]['code'])){
-            $html .= "<tr><td><div class=\"nearestApt\">" . $airports[$i]['code'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "<br><small><i>" . $airports[$i]['city'] . "</i></small></div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
-          }
+
+       foreach($airports as $oneAirport){
+
+            $html .= "<tr><td><div class=\"nearestApt\">" . $oneAirport['aptCode'] . "</div></td><td><div class=\"nearestApt\">" . strtoupper($oneAirport['name']) . "<br><small><i>" . strtoupper($oneAirport['city'] . ", " . $oneAirport['stateAbbrev']) . "</i></small></div></td><td><div class=\"nearestApt\">" . $oneAirport['distance'] . "&nbsp;nm " . $oneAirport['compass'] . "</div></td></tr>\n";
        }
     $html .= "</table>";
 
@@ -102,14 +84,73 @@ $html = "<h2 class=\"main nearest\">Nearest airports to center of $gridLabel</h2
     // Code for DISPLAY version
     $html .= "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\">
       <tr><th><div class=\"nearestApt\">Code</div></th><th><div class=\"nearestApt\">Name</div></th><th class=\"noprint\"><div class=\"nearestApt\">City</div></th><th><div class=\"nearestApt\">Distance</div></th></tr>\n";
-       for ($i=0; $i<=4; $i++){
-          if (isset($airports[$i]['code'])){
-            $html .= "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"" . $airports[$i]['link'] . "\" target=\"_blank\">" . $airports[$i]['code'] . "</a></div></td><td><div class=\"nearestApt\">" . $airports[$i]['name'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['city'] . "</div></td><td><div class=\"nearestApt\">" . $airports[$i]['distance'] . "</div></td></tr>\n";
-          }
+       foreach($airports as $oneAirport){
+            $html .= "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"https://www.airnav.com/airport/" . $oneAirport['aptCode'] . "\" target=\"_blank\">" . $oneAirport['aptCode'] . "</a></div></td><td><div class=\"nearestApt\">" . strtoupper($oneAirport['name']) . "</div></td><td><div class=\"nearestApt\">" . strtoupper($oneAirport['city'] . ", " . $oneAirport['stateAbbrev']) . "</div></td><td><div class=\"nearestApt\">" . $oneAirport['distance'] . "&nbsp;nm " . $oneAirport['compass'] . "</div></td></tr>\n";
        }
-    $html .=  "</table>";
+    $html .=  "</table><p style=\"display:none;margin-top:0;text-align:center;\"><i>Airport data current as of $dataLastModified</i></p>";
   }
 
 echo $html;
-?>
-</body>
+echo "</body>\n";
+
+
+
+/**
+ * Get the "limit" Nearest Airports to given lat/lon
+ * using Haversine formula
+ *   Input:  - Lat and Lon of grid center, in decimal degrees (XXX.yyyyyy)
+ *           - Maximum distance from grid center, in NM
+ *           - Maximum number of rows to return
+ *   Output: Array of matching airports
+ */
+
+function getNearestAirports($latGridCenter, $lonGridCenter, $maxDistanceFromAirportNM, $limit=5){
+global $db;
+
+$airports=array();
+//$bearing=array();
+//$compass=array();
+//$distance = 30 / 60  ;
+$NM_conversion = 3440;    // Radius of Earth in NM
+//$latitudeBottom  = $latGridCenter - $distance;
+//$latitudeTop     = $latGridCenter + $distance;
+//$longitudeBottom = $lonGridCenter - $distance; 
+//$longitudeTop    = $lonGridCenter + $distance;
+
+
+//$query = "SELECT name, city, aptCode, decLatitude, decLongitude from apt_data 
+//          WHERE (decLatitude BETWEEN $latitudeBottom AND $latitudeTop) 
+//          AND (decLongitude BETWEEN $longitudeBottom AND $longitudeTop)";
+$haversine_query = "SELECT name, city, stateAbbrev, aptCode, X(coordinates),Y(coordinates),
+                   ($NM_conversion *  acos (
+                     cos( radians($latGridCenter))
+                   * cos( radians( Y(coordinates)))
+                   * cos( radians($lonGridCenter) - radians( X(coordinates)))
+                   + sin( radians($latGridCenter))
+                   * sin( radians( Y(coordinates)))
+                   ) ) AS distance
+                  FROM apt_data
+                  HAVING distance < $maxDistanceFromAirportNM
+                  ORDER BY distance ASC
+                  LIMIT $limit";
+
+//echo "<pre>$haversine_query\n</pre>";
+$r1 = $db->query($haversine_query);
+
+$idx=0;
+  while ($myrow=$r1->fetch_array(MYSQLI_ASSOC)){
+    $oneAirport=array();
+    $oneAirport['aptCode']     = $myrow['aptCode'];
+    $oneAirport['name']        = $myrow['name'] . " Airport";
+    $oneAirport['distance']    = round($myrow['distance'], 1);
+    // $dist = gc_distance($lat, $lon, $latGridCenter, $lonGridCenter);
+    $oneAirport['city']        = $myrow['city'];
+    $oneAirport['stateAbbrev'] = $myrow['stateAbbrev'];
+    $oneAirport['bearing']     = getRhumbLineBearing($latGridCenter, $lonGridCenter, $myrow['decLatitude'], $myrow['decLongitude']);
+    $oneAirport['compass']     = getCompassDirection($oneAirport['bearing']);
+    $airports[] = $oneAirport;
+  }
+
+return($airports);
+}
+
