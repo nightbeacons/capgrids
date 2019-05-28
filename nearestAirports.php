@@ -121,6 +121,9 @@ $NM_conversion = 3440;    // Radius of Earth in NM
 //$query = "SELECT name, city, aptCode, decLatitude, decLongitude from apt_data 
 //          WHERE (decLatitude BETWEEN $latitudeBottom AND $latitudeTop) 
 //          AND (decLongitude BETWEEN $longitudeBottom AND $longitudeTop)";
+
+//  Longitude of airport is X(coordinates)
+//  Latitude of airport is Y(coordinates)
 $haversine_query = "SELECT name, city, stateAbbrev, aptCode, X(coordinates),Y(coordinates),
                    ($NM_conversion *  acos (
                      cos( radians($latGridCenter))
@@ -140,13 +143,16 @@ $r1 = $db->query($haversine_query);
 $idx=0;
   while ($myrow=$r1->fetch_array(MYSQLI_ASSOC)){
     $oneAirport=array();
+    $airportDecLatitude        = $myrow['Y(coordinates)'];
+    $airportDecLongitude       = $myrow['X(coordinates)'];
     $oneAirport['aptCode']     = $myrow['aptCode'];
     $oneAirport['name']        = $myrow['name'] . " Airport";
     $oneAirport['distance']    = round($myrow['distance'], 1);
     // $dist = gc_distance($lat, $lon, $latGridCenter, $lonGridCenter);
     $oneAirport['city']        = $myrow['city'];
     $oneAirport['stateAbbrev'] = $myrow['stateAbbrev'];
-    $oneAirport['bearing']     = getRhumbLineBearing($latGridCenter, $lonGridCenter, $myrow['decLatitude'], $myrow['decLongitude']);
+    // For bearing, pass the lat + long of grid center, then the lat + lon of target airport
+    $oneAirport['bearing']     = getRhumbLineBearing($latGridCenter, $lonGridCenter, $airportDecLatitude, $airportDecLongitude);
     $oneAirport['compass']     = getCompassDirection($oneAirport['bearing']);
     $airports[] = $oneAirport;
   }
