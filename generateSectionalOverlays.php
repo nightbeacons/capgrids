@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-$baseDir="/var/www/dev.capgrids/htdocs/sectionalOverlays/";
+$baseDir="/var/www/www.capgrids/htdocs/sectionalOverlays/";
 $geonames = getGeonames();
 
 
@@ -64,10 +64,22 @@ print_r($info);
 // Create the KML
    if (file_exists($tiffFilename)){
       $kml = $dirname . "/" . $geoname_No_Spaces . ".kml";
-      $cmd = "/usr/bin/gdal_translate -of KMLSUPEROVERLAY -expand rgba '" . $tiffFilename . "' $kml -co format=png";
+      //         Also check -expand rgba
+      $cmd = "/usr/bin/gdal_translate -of KMLSUPEROVERLAY -expand rgb '" . $tiffFilename . "' $kml -co format=png";
       $tmp = `$cmd`; 
 
     }
+
+// Optimize/Compress PNG files
+$findCmd = "find $dirname -print | grep -i \".png$\"";
+$fileAry = array_filter(explode(PHP_EOL, `$findCmd`));
+   foreach($fileAry as $filename){
+   $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o7 \"$filename\"";
+   echo "PNG: Checking $filename . . .\n";
+   $tmp1 = `$cmd`;
+   }
+
+
 
   }
 
