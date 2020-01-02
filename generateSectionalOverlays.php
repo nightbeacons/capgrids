@@ -1,11 +1,11 @@
 #!/usr/bin/php
 <?php
 
-$baseDir="/var/www/www.capgrids/htdocs/sectionalOverlays/";
+$baseDir="/var/www/capgrids/htdocs/sectionalOverlays/";
 $geonames = getGeonames();
 
 
-for ($i=0; $i<=5; $i++){
+for ($i=0; $i<=7; $i++){
 getTiff($geonames[$i], $baseDir);
 }
 
@@ -74,9 +74,9 @@ print_r($info);
 $findCmd = "find $dirname -print | grep -i \".png$\"";
 $fileAry = array_filter(explode(PHP_EOL, `$findCmd`));
    foreach($fileAry as $filename){
-   $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o7 \"$filename\"";
+   $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o5 \"$filename\"";
    echo "PNG: Checking $filename . . .\n";
-   $tmp1 = `$cmd`;
+   $tmp1 = `$cmd1`;
    }
 
 
@@ -99,7 +99,6 @@ function getGeonames()
 
 return  array(
 	'Albuquerque',
-	'Anchorage', 
 	'Atlanta', 
 	'Billings', 
 	'Brownsville', 
