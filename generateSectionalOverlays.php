@@ -1,12 +1,14 @@
 #!/usr/bin/php
 <?php
 /**
+ * File: generateSectionalOverlays.php
+ *
  * Fetch and generate Sectional Overlays
  */
 
 include_once "includes/coordinates2.php";
 
-$baseDir = "/var/www/capgrids/htdocs/overlays2/";
+$baseDir = "/var/www/capgrids/htdocs/overlays/";
 
 foreach ($coordinates as $grid => $value) {
   if ($coordinates[$grid]['FullName'] != "None") {
@@ -19,9 +21,13 @@ foreach ($coordinates as $grid => $value) {
 /**
  * Function getTiff($geoname, $baseDir)
  *   Per https://app.swaggerhub.com/apis/FAA/APRA/1.2.0#/Sectional%20Charts/getSectionalChart
- *   fetch georeferenced Tiff and write to basedir/geoname.
+ *   For each sectional in the coordinates.php file:
+ *     - Fetch the Geo-referenced Tiff file (in ZIP format), write it to basedir/geoname and unzip
+ *     - Run gdal_translate to create KML superoverlay (KML + images in PNG format)
+ *     - Optimize the generated PNGs
  */
 function getTiff($geoname, $baseDir) {
+  $user_agent = "Civil Air Patrol - CAPgrids (+https://www.capgrids.com)";
   $geoname_No_Spaces = str_replace(" ", "_", $geoname);
   $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
   $headers = ['Accept: application/json'];
@@ -29,6 +35,7 @@ function getTiff($geoname, $baseDir) {
   // Get JSON for path to the downlad.
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
   curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
@@ -43,9 +50,11 @@ function getTiff($geoname, $baseDir) {
     if (!is_dir($dirname)) {
       mkdir($dirname, 0755, TRUE);
     }
+    // Download the zipfile
     $fh = fopen($zipfilename, 'w');
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $info->edition[0]->product->url);
+    curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_FILE, $fh);
@@ -66,7 +75,7 @@ function getTiff($geoname, $baseDir) {
     $zip->extractTo($dirname);
     $zip->close();
 
-    // Create the KML.
+    // Run gdal_translate to create the KML.
     if (file_exists($tiffFilename)) {
       $kml = $dirname . "/" . $geoname_No_Spaces . ".kml";
       // Also check -expand rgba.
