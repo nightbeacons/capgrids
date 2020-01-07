@@ -87,7 +87,7 @@ function getTiff($geoname, $baseDir) {
       for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
         $parts = pathinfo($filename);
-        if ($parts['extension'] == 'tif') {
+        if (($parts['extension'] == 'tif') and (strpos($parts['filename'], $geoname) !== FALSE)) {
           $tiffFilename = $dirname . "/" . $filename;
         }
       }
@@ -97,11 +97,11 @@ function getTiff($geoname, $baseDir) {
       // Run gdal_translate to create the KML.
       if (file_exists($tiffFilename)) {
         $kml = $dirname . "/" . $geoname_No_Spaces . ".kml";
-        // Use JPEG for all except Hawaiian Islands
+        // Use JPEG for all except Hawaiian Islands.
         $output_format = "jpeg";
-          if ($geoname_No_Spaces=="Hawaiian_Islands"){
-               $output_format = "png";
-          }
+        if ($geoname_No_Spaces == "Hawaiian_Islands") {
+          $output_format = "png";
+        }
         // Also check -expand rgba.
         $cmd = "/usr/bin/gdal_translate -of KMLSUPEROVERLAY -expand rgb '" . $tiffFilename . "' $kml -co format=$output_format";
         $tmp = `$cmd`;
@@ -129,7 +129,6 @@ function getTiff($geoname, $baseDir) {
         echo "JPG: optimizing $filename . . .\n";
       }
 
-
       // Optimize/Compress PNG files.
       $findCmd = "find $dirname -print | grep -i \".png$\"";
       $fileAry = array_filter(explode(PHP_EOL, `$findCmd`));
@@ -138,7 +137,6 @@ function getTiff($geoname, $baseDir) {
         $tmp1 = `$cmd1`;
         echo "PNG: optimizing $filename . . .\n";
       }
-
 
       // End of "if ($faa_edition != $my_edition)".
     }
