@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /overlays/
+Disallow: /help/
+Disallow: /fpl/
+Disallow: /kml.php
+Disallow: kmlLoader.php
+Disallow: grid2lonlat.php

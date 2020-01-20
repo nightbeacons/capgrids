@@ -1,0 +1,2 @@
+cat foo | grep '<faa:Member>\|<aixm:locationIndicatorICAO>\|<aixm:name>\|<gml:pos>\|<\/faa:Member>' | perl -0777 -pe 's|<faa:Member>[[:space:]]*</faa:Member>||sg' | perl -0777 -pe 's|^[[:space:]]*$||sg'
+

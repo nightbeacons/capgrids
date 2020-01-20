@@ -1,0 +1,14 @@
+https://maps.googleapis.com/maps/api/timezone/json?location=38.908133,-77.047119&timestamp=1458000000&key=YOUR_API_KEY
+
+Key =  AIzaSyB6m73beXLhQ6LicDE1x0kydJuejAndpIo 
+
+$zenith=96;
+echo "<br><p>Civilian Twilight start: ".date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $long, $zenith, $offset);
+echo "<br>Civilian Twilight end: ".date_sunset(time(), SUNFUNCS_RET_STRING, $lat, $long, $zenith, $offset);
+
+offset = gmtoffset, in hours
+
+SUNFUNCS_RET_STRING 	returns the result as string 	16:46
+SUNFUNCS_RET_DOUBLE 	returns the result as float 	16.78243132
+SUNFUNCS_RET_TIMESTAMP 	returns the result as integer (timestamp) 	1095034606
+
