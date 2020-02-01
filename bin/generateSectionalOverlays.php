@@ -102,6 +102,10 @@ function getTiff($geoname, $baseDir) {
       // If our edition does not match the FAA edition, (or if FETCH_ALL is set) get the FAA edition.
       if (($faa_edition != $my_edition) or (FETCH_ALL == 1)) {
 
+        // Remove the older .htm files
+        $cmd1 = "/bin/rm " . $dirname . "/*.htm";
+        $tmp = `$cmd1`;
+
         // Download the zipfile.
         $fh = fopen($zipfilename, 'w');
         $ch = curl_init();
@@ -136,8 +140,15 @@ function getTiff($geoname, $baseDir) {
             $output_format = "png";
           }
           // Also check -expand rgba.
-          $cmd = "/usr/bin/gdal_translate -of KMLSUPEROVERLAY -expand rgb '" . $tiffFilename . "' $kml -co format=$output_format";
+          $cmd = "/usr/bin/gdal_translate -of KMLSUPEROVERLAY -expand rgba '" . $tiffFilename . "' $kml -co format=$output_format";
           $tmp = `$cmd`;
+
+          // Add the current edition number to the <name> of the KML file
+          $kml_contents = file_get_contents($kml);
+          $searchTerm = "<name>" . $geoname_No_Spaces . "</name>";
+          $replacement = "<name>" . $geoname . " Sectional " . $faa_edition . "</name>";
+          $kml_contents = str_replace($searchTerm, $replacement, $kml_contents);
+          file_put_contents($kml, $kml_contents);
 
           // Get the date of the next edition.
           $nextDate = getNextEditionDate($geoname);
@@ -169,7 +180,7 @@ function getTiff($geoname, $baseDir) {
           chgrp($filename, $group);
 
           // $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o5 \"$filename\"";
-          echo "JPG: optimizing $filename . . .\n";
+         // echo "JPG: optimizing $filename . . .\n";
         }
 
         // Optimize/Compress PNG files.
@@ -178,7 +189,7 @@ function getTiff($geoname, $baseDir) {
         foreach ($fileAry as $filename) {
           $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o5 \"$filename\"";
           $tmp1 = `$cmd1`;
-          echo "PNG: optimizing $filename . . .\n";
+        //  echo "PNG: optimizing $filename . . .\n";
         }
 
         // End of "if ($faa_edition != $my_edition)".
