@@ -151,7 +151,7 @@ $text="	<Folder>
 						<south>" . ($dataset['MinLat'] - 2) . "</south>
 						<east>" . ($dataset['avgLon'] + 10.5) . "</east>
 						<west>" . ($dataset['avgLon'] - 10.5) . "</west>
-						<rotation>nan</rotation>
+						<rotation>0</rotation>
 						<minAltitude>0</minAltitude>
 						<maxAltitude>0</maxAltitude>
 					</LatLonAltBox>
@@ -212,7 +212,7 @@ $text = "			<Folder>
                                                 <south>" . ($dataset['MinLat'] - 2) . "</south>
   												<east>"  . ($dataset['avgLon'] + 10.5) . "</east>
 												<west>"  . ($dataset['avgLon'] - 10.5) . "</west>
-												<rotation>nan</rotation>
+												<rotation>0</rotation>
 						<minAltitude>0</minAltitude>
 						<maxAltitude>0</maxAltitude>
 					</LatLonAltBox>
@@ -272,7 +272,7 @@ $text = "                       <Folder>
                                                 <south>" . ($dataset['MinLat'] - 2) . "</south>
                                             	<east>"  . ($dataset['avgLon'] + 10.5) . "</east>
 												<west>"  . ($dataset['avgLon'] - 10.5) . "</west>
-                                                <rotation>nan</rotation>
+                                                <rotation>0</rotation>
                                                 <minAltitude>0</minAltitude>
                                                 <maxAltitude>0</maxAltitude>
                                         </LatLonAltBox>
@@ -341,7 +341,7 @@ $text = "				<Folder>
                                                 	<south>" . ($dataset['MinLat'] - 2) . "</south>
                                                 	<east>"  . ($dataset['avgLon'] + 10.5) . "</east>
 													<west>"  . ($dataset['avgLon'] - 10.5) . "</west>
-							<rotation>nan</rotation>
+							<rotation>0</rotation>
 							<minAltitude>0</minAltitude>
 							<maxAltitude>0</maxAltitude>
 						</LatLonAltBox>
