@@ -183,10 +183,23 @@ function getTiff($geoname, $baseDir) {
          // echo "JPG: optimizing $filename . . .\n";
         }
 
-        // Optimize/Compress PNG files.
+        // Make transparent, then Optimize/Compress PNG files.
         $findCmd = "find $dirname -print | grep -i \".png$\"";
         $fileAry = array_filter(explode(PHP_EOL, `$findCmd`));
         foreach ($fileAry as $filename) {
+
+          // If a given tile is more than 75% white, set white to transparent
+          $cmdC1 = "/usr/bin/convert \"$filename\" -alpha off -scale 1x1 -format \"%[fx:u]\" info:";
+          $check1 = trim(`$cmdC1`) + 0;
+          //  $cmdC2 = "/usr/bin/convert  \"$filename\" -format %c histogram:info:- | grep -v rgba | head -1";
+          //  $check2a = trim(`$cmdC2`);
+          //  $check2 = preg_match("/^\d+: \(255,255,255\) #FFFFFF white/", $check2a);
+          //  echo "$filename\n|CHECK 1 = $check1|\n|$check2a|\n$check2\n\n";
+            if ($check1 > 0.75) {
+              $cmd4 = "/usr/bin/convert \"$filename\" -fuzz 2% -transparent white \"$filename\"";
+              $tmp4 = `$cmd4`;
+            }
+
           $cmd1 = "/usr/bin/optipng -quiet -preserve -strip all -o5 \"$filename\"";
           $tmp1 = `$cmd1`;
         //  echo "PNG: optimizing $filename . . .\n";
