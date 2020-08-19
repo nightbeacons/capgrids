@@ -7,9 +7,10 @@
 include_once("includes/gridFunctions.php");
 include_once("includes/simple_html_dom.php");
 include_once("/var/www/capgrids/pwf/apt.php");
+include_once("includes/lastMod.php");
 
-$cmd = "stat --format=%Z " .  $_SERVER['DOCUMENT_ROOT'] . "/data";
-$dataLastModified = date("j-M-Y", trim(`$cmd`));
+//$cmd = "stat --format=%Z " .  $_SERVER['DOCUMENT_ROOT'] . "/data";
+//$dataLastModified = date("j-M-Y", trim(`$cmd`));
 
 $SELF= $_SERVER['PHP_SELF'];
 
@@ -87,7 +88,7 @@ $html = "<h2 class=\"main nearest\">Nearest Airports to Center of $gridLabel</h2
        foreach($airports as $oneAirport){
             $html .= "<tr><td><div class=\"nearestApt\"><a class=\"nearestApt\" href=\"https://www.airnav.com/airport/" . $oneAirport['aptCode'] . "\" target=\"_blank\">" . $oneAirport['aptCode'] . "</a></div></td><td><div class=\"nearestApt\">" . strtoupper($oneAirport['name']) . "</div></td><td><div class=\"nearestApt\">" . strtoupper($oneAirport['city'] . ", " . $oneAirport['stateAbbrev']) . "</div></td><td><div class=\"nearestApt\">" . $oneAirport['distance'] . "&nbsp;nm " . $oneAirport['compass'] . "</div></td></tr>\n";
        }
-    $html .=  "</table><p style=\"display:none;margin-top:0;text-align:center;\"><i>Airport data current as of $dataLastModified</i></p>";
+    $html .=  "</table><p style=\"display:block;margin-top:0;text-align:right;\"><i>Airport data current as of $dataLastModified</i></p>";
   }
 
 echo $html;
