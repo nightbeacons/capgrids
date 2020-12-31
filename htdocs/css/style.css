@@ -262,6 +262,25 @@ background: -webkit-linear-gradient(rightt,  rgba(162,191,214,1) 0%,rgba(255,255
 background: linear-gradient(to left,  rgba(162,191,214,1) 0%,rgba(255,255,255,0) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#a2bfd6',GradientType=1 ); /* IE6-9 */}
 
+p.sectionalUpdateHead {
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+li.sectionalUpdateRow {
+  font-size: 14px;
+}
+
+a.sectionalUpdateLink {
+  text-decoration: none;
+        color: #0000ee;
+}
+
+a.sectionalUpdateLink:hover {
+        text-decoration: underline;
+        color: #cc3300;
+}
+
 @media print {
 
 h2.nearest {

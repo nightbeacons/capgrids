@@ -4,29 +4,42 @@ include_once "/var/www/capgrids/pwf/apt.php";
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 
-  if (mysqli_connect_errno()){
-  printf("Connection failed: %s\n", mysqli_connect_error());
-  exit();
-  }
-
 $workDir = "/tmp/aixm/";
    if (!is_dir($workDir)){
    mkdir($workDir);
    }
-$file = $workDir . "APT.txt";
-$result = downloadLatestZipfile($workDir);
 
-   if (!file_exists($file)){
-   die('Could not find APT.txt file. Exiting');
-   }
-$result = parseFile($file);
+$nextFile = $workDir . "nextEdition.txt";
+$nextDate = file_get_contents($nextFile);
+$today = date('Y-m-d');
 
-$query = "OPTIMIZE TABLE apt_data";
-$try = $db->query($query);
+// If the "Next Edition Date" is today 
+//  (or in the past)
+// then fetch the new files
+  if ($today >= $nextDate){
 
-mysqli_close($db);
+    if (mysqli_connect_errno()){
+    printf("Connection failed: %s\n", mysqli_connect_error());
+    exit();
+    }
+  $file = $workDir . "APT.txt";
+  $result = downloadLatestZipfile($workDir);
 
-writeIncludeFile();
+     if (!file_exists($file)){
+     die('Could not find APT.txt file. Exiting');
+     }
+  $result = parseFile($file);
+
+  $query = "OPTIMIZE TABLE apt_data";
+  $try = $db->query($query);
+
+  writeIncludeFile();
+  writeNextEditionDate($nextFile);
+  mysqli_close($db);
+
+  }
+
+
 
 /**
  * parseFile($file)
@@ -102,7 +115,7 @@ $fh = fopen($file, "r");
  * Find and download the latest AIXM data file
  * Save to $workDir as aixmData.zip
  *
- *  See https://app.swaggerhub.com/apis/FAA/APRA/1.1.0 (56 Day Subscription) for API details
+ *  See https://app.swaggerhub.com/apis/FAA/APRA/ (28 Day Subscription) for API details
  */
 
 function downloadLatestZipfile($workDir){
@@ -143,8 +156,10 @@ echo "Fetching $zipFileUrl\n";
              );
 
       if ($retval > 0){
+      echo "Unzipping $zipFileDest to $workDir \n";
       $unpack = "/usr/bin/unzip -o $zipFileDest -d $workDir && /bin/rm $zipFileDest";
       $cmdResult = `$unpack`;
+      echo "Result of unzip is $cmdResult\n";
       }
 
 return($result);
@@ -211,4 +226,27 @@ fwrite($fh, "<?php\n\$dataLastModified = \"$effDate\";\n");
 fclose($fh);
 
 }
+
+
+/**
+ * Get the date of the next edition and write to a file
+ */
+function writeNextEditionDate($nextFile)
+{
+$nextUrl = "https://soa.smext.faa.gov/apra/nfdc/nasr/info?edition=next";
+$result = fetchUrl($nextUrl);
+   if (strpos($result['error'], "client certificate not found") > 1){
+   $result['error']="";
+   }
+   if (strlen($result['error']) < 1){
+   $info = json_decode($result['result']);
+   //      print_r($info);
+
+   $editionDateObj = date_create_from_format('m/d/Y', $info->edition[0]->editionDate);
+   $editionDate = date_format($editionDateObj, 'Y-m-d');
+   }
+file_put_contents($nextFile, $editionDate);
+//echo "NEXT IS |" . $editionDate . "|\n\n";
+}
+
 

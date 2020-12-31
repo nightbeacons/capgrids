@@ -16,6 +16,7 @@ define('FETCH_ALL', 0);
 include_once "/var/www/capgrids/pwf/apt.php";
 
 $baseDir = "/var/www/capgrids/htdocs/overlays/";
+$latestSectionalFile = "/var/www/capgrids/htdocs/includes/latestSectionals.php";
 $user_agent = "Civil Air Patrol - CAPgrids (+https://www.capgrids.com)";
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
@@ -29,10 +30,13 @@ $query = "SELECT FullName, editionDate, editionNumber, nextDate from coordinates
 
 $r1 = $db->query($query);
 
-
+$currentKMLfile="";
 while ($myrow = $r1->fetch_array(MYSQLI_ASSOC)) {
   $currentKMLfile = getTiff($myrow['FullName'], $baseDir);
 }
+  if ($currentKMLfile != ""){
+    writeLatestSectionalIncludeFile($db, $latestSectionalFile);
+  }
 
 // Foreach ($coordinates as $grid => $value) {
 //  if ($coordinates[$grid]['FullName'] != "None") {
@@ -208,7 +212,7 @@ function getTiff($geoname, $baseDir) {
         // End of "if ($faa_edition != $my_edition)".
       }
       else {
-        echo "Skipping $geoname -- we have latest version\n";
+        echo "Skipping $geoname -- we have latest version: Ours = $my_edition and FAA = $faa_edition \n";
       }
 
       // End of "if ($info->status->code == "200")".
@@ -220,6 +224,7 @@ function getTiff($geoname, $baseDir) {
   // Return relative path to the generated KML file
   //  such as Baltimore.kml.
   $kml_relative = $geoname_No_Spaces . ".kml";
+  return($kml_relative);
 }
 
 /**
@@ -269,4 +274,32 @@ function faaDate2SQLdate($faa_date) {
   $date_ary = date_parse_from_format("m/d/Y", $faa_date);
   $sql_date = sprintf("%04d-%02d-%02d", $date_ary['year'], $date_ary['month'], $date_ary['day']);
   return($sql_date);
+}
+
+
+/**
+ * writeLatestSectionalIncludeFile($db, $filespec)
+ *   Write the 'include' file that lists the sectionals
+ * just updated.
+ */
+function writeLatestSectionalIncludeFile($db, $latestSectionalFile){
+
+$fh = fopen($latestSectionalFile, "w");
+$count=0;
+$query = "SELECT FullName, Abbrev, editionNumber, DATE_FORMAT(editionDate, '%e-%M-%Y') AS editionDate from coordinates
+   WHERE editionDate = (select distinct editionDate from coordinates  order by editionDate desc limit 1)
+   ORDER BY FullName";
+
+$r1 = $db->query($query);
+
+  while ($myrow = $r1->fetch_array(MYSQLI_ASSOC)) {
+    if ($count ==0){
+      fwrite($fh, "<p class=\"sectionalUpdateHead\">Sectionals updated " . $myrow['editionDate'] . ":</p>\n<ul>\n");
+    }
+  fwrite($fh, "<li class=\"sectionalUpdateRow\"><a class=\"sectionalUpdateLink\" href=\"/overlays/" . $myrow['Abbrev'] . "_grid.kmz\">" . $myrow['FullName'] . "</a>  " . $myrow['editionNumber'] . "</li>\n");
+  $count++;
+  }
+fwrite($fh, "</ul>\n");
+fclose($fh);
+
 }
