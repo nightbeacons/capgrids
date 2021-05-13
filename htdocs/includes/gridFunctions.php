@@ -723,8 +723,8 @@ function getCompassDirection($bearing) {
  */
 
 function GetCivilTwilight($lat, $lon) {
+global $googleAPIkey;
 
-$googleAPIkey = "AIzaSyB6m73beXLhQ6LicDE1x0kydJuejAndpIo";
 // zenith value set to 96 for civil twilight times
 $zenith       = 96;    
 $twilight = array();
