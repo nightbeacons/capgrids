@@ -2,6 +2,7 @@
 # Grid Functions
 date_default_timezone_set("UTC"); 
 include_once("coordinates.php");
+include_once("/var/www/capgrids/pwf/keys.php");
 
 # ============================================== Globals ===========================================
 
@@ -432,10 +433,10 @@ return ($decl);
 
 function ourSectional()
 {
+global $ipinfo_token;
 $longitude="-147";
 $latitude="48";
-
-$geolocationURL="http://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] . "/loc";
+$geolocationURL="https://ipinfo.io/" . $_SERVER['REMOTE_ADDR'] . "/loc?token=" . $ipinfo_token;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $geolocationURL);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);    // Timeout in 4 seconds
@@ -456,11 +457,13 @@ $latLonAry = explode(",", $output);
 $latlonAry = lonlat2grid($longitude, $latitude);
 $sectional = $latlonAry['sectional'];
 
- // $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
- // $fh = fopen($logfile, "a");
- // $record = $latitude . "\t" . $longitude . "\t" . $sectional . "\n";
- // fwrite($fh, $record);
- // fclose($fh);
+//  $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
+//  $fh = fopen($logfile, "a");
+//  $record = "----------\ngeolocationURL = $geolocationURL\n";
+//  $record .= "Return value from geolocationURL = " . print_r($output, TRUE);
+//  $record .= "Lat = " . $latitude . "\tLon = " . $longitude . "\tSectional = " . $sectional . "\n";
+//  fwrite($fh, $record);
+//  fclose($fh);
 
 $sectionalArray = array('name'       => $latlonAry['sectional'],
                         'grid'       => $latlonAry['grid'],
