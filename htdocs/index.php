@@ -65,8 +65,21 @@ $default_sectional = $sectionalAry['name'];
   return false;
   }
   </script>
+
+<!-- Hotjar Tracking Code for https://www.capgrids.com -->
+<script>
+    (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:2268211,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+</script>
 </head>
 <body style="margin:0;">
+<?php include_once("includes/fb.php") ?>
 <?php include_once("includes/ga.php") ?>
 <table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%" style="position:relative;">
 <tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><div class="bannerOverlay"><h1 class="overlay">CAPgrids</h1><h3 class="overlay">The Swiss-Army Knife of Search Grids<h3></div><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
@@ -90,7 +103,7 @@ drawSectionalOptions($default_sectional);
 ?>
 	</select>
 </form>
-<IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=<?php echo $default_sectional;?>" frameBorder=0 width=500 scrolling=no height=200></IFRAME>
+<IFRAME id=gridwin marginWidth=0 marginHeight=0 src="gridinfo.php?id=<?php echo $default_sectional;?>" frameBorder=0 width=500 scrolling=no height=200 data-hj-allow-iframe=""></IFRAME>
 
 
 </td><td valign="top" width="240" bgcolor="#fef0f0">
@@ -103,7 +116,7 @@ include_once("help/searchgrid.php");
 
 <tr><td valign="top"><h2 class="main">Find a Grid</h2>
 
-<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:10em;" ></IFRAME>
+<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:10em;" data-hj-allow-iframe="" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0" width-"240">
 <?php
@@ -116,7 +129,7 @@ include_once("help/findgrid.php");
 <tr><td valign="top"><h2 class="main">Find Grid Corners</h2>
 <img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;bottom:30px;margin-right:20px;cursor:pointer;cursor:hand;">
 
-<IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 ></IFRAME>
+<IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 data-hj-allow-iframe="" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
@@ -125,7 +138,7 @@ include_once("help/findcorners.php");
 </td></tr>
 <tr><td colspan="2"><hr></td></tr>
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
-<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
+<IFRAME id="resources" name="resources" marginWidth=0 marginHeight=0 src="resources.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 data-hj-allow-iframe="" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
@@ -139,7 +152,7 @@ include_once("help/resources.php");
 
 <tr><td colspan="2"><hr></td></tr>
 <tr><td valign="top"><img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;top:20px;margin-right:20px;cursor:pointer;cursor:hand;">
-<IFRAME id="nearest" name="nearest" marginWidth=0 marginHeight=0 src="nearestAirports.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 ></IFRAME>
+<IFRAME id="nearest" name="nearest" marginWidth=0 marginHeight=0 src="nearestAirports.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=540 data-hj-allow-iframe="" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
