@@ -4,12 +4,14 @@ include_once "/var/www/capgrids/pwf/aixm.php";
 include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_apt.php";
 include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_fix.php";
 include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_nav.php";
+include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_ils.php";
+
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 
 // DB table names are lc versions of filenames
 //$files_to_process = array('APT', 'NAV', 'FIX');
-$files_to_process = array('FIX');
+$files_to_process = array('ILS');
 
 
 $workDir = "/tmp/aixm/";
@@ -53,6 +55,9 @@ $today = date('Y-m-d');
       $result = parseFixFile($file);
       break;
 
+    case "ILS":
+      $result = parseIlsFile($file);
+      break;
   }
 
 //  $query = "OPTIMIZE TABLE " . lc($data_file);
