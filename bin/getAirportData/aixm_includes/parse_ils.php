@@ -8,81 +8,108 @@
  *     "start" array element is the data file's "START" value - 1
  */
 
-function parseIlsFile($file){
-global $db;
+function parseIlsFile($file) {
+  global $db;
 
-$stringPositions = initIlsStringPositions();
+  $stringPositions = initIlsStringPositions();
 
-$query = "DELETE FROM ils";
-$try = $db->query($query);
-$try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_loc_data_coord");
-$try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_gs_data_coord");
-$try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_dme_data_coord");
+  $try = $db->query("DELETE FROM ils");
+  $try = $db->query("DELETE FROM markerbeacon");
+  $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_loc_data_coord");
+  $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_gs_data_coord");
+  $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_dme_data_coord");
 
-$fh = fopen($file, "r");
-   if ($fh){
+  $fh = fopen($file, "r");
+  if ($fh) {
 
-         while ($line = fgets($fh)){
-         $ilsData = array();
-         $type = intval(trim(substr($line, 3, 1)));    // Type of record, 1 - 5
-         $airport_record_id = trim(substr($line, 4, 11));
-         $escaped_airport_record_id = $db->real_escape_string($airport_record_id);
-         $q_init = "INSERT INTO ils(airport_site_id) VALUES ('" . $escaped_airport_record_id . "')
+    while ($line = fgets($fh)) {
+      $ilsData = [];
+      $mbData  = [];
+      // Type of record, 1 - 5.
+      $type = intval(trim(substr($line, 3, 1)));
+
+      if ($type < 5) {
+
+        $airport_record_id = trim(substr($line, 4, 11));
+        $escaped_airport_record_id = $db->real_escape_string($airport_record_id);
+        $q_init = "INSERT INTO ils(airport_site_id) VALUES ('" . $escaped_airport_record_id . "')
                     ON DUPLICATE KEY UPDATE airport_site_id=airport_site_id";
 
-         $try = $db->query($q_init);
-            // Put each value into an array, so data can be manipulated before inserting into DB
-         if ($type < 5) {
+        $try = $db->query($q_init);
+        // Put each value into an array, so data can be manipulated before inserting into DB.
+        foreach ($stringPositions[$type] as $key => $position) {
+          $value = trim(substr($line, $position['start'], $position['length']));
+          $ilsData[$airport_record_id][trim($key)] = $value;
+        }
+
+        switch ($type) {
+          case 2:
+            $ilsData[$airport_record_id]['loc_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_latitude']);
+            $ilsData[$airport_record_id]['loc_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_longitude']);
+            break;
+
+          case 3:
+            $ilsData[$airport_record_id]['gs_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_latitude']);
+            $ilsData[$airport_record_id]['gs_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_longitude']);
+            break;
+
+          case 4:
+            $ilsData[$airport_record_id]['dme_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_latitude']);
+            $ilsData[$airport_record_id]['dme_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_longitude']);
+            break;
+        } // end of switch
+
+        foreach ($ilsData as $airport_record_id => $record_value) {
+          $query = "UPDATE ils SET \n";
+          foreach ($record_value as $key => $value) {
+            $query .= "   `" . trim($key) . "` = '" . $db->real_escape_string($value) . "',\n";
+          }
+          $query = rtrim($query, " \n,");
+          $query .= " WHERE airport_site_id='" . $airport_record_id . "'";
+          if (($try = $db->query($query)) === FALSE) {
+            printf("Invalid query: %s\nWhole query: %s\n", $db->error, $query);
+            exit();
+          }
+        }
+
+      } elseif ($type ==5) { 
+        // Handle marker Beacons
+	// Put each value into an array, so data can be manipulated before inserting into DB
             foreach($stringPositions[$type] as $key => $position){
-               $value = trim(substr($line, $position['start'], $position['length']));
-               $ilsData[$airport_record_id][trim($key)] = $value;
+            $value = trim(substr($line, $position['start'], $position['length']));
+            $mbData[trim($key)] = $value;
+            }
+            $mbData['mb_decLatitude']  = convertToDecimalDegrees($mbData['mb_latitude']);
+            $mbData['mb_decLongitude'] = convertToDecimalDegrees($mbData['mb_longitude']);
+
+         $query = "INSERT INTO markerbeacon SET \n";
+            foreach($mbData as $key => $value){
+            $query .= "   `" . trim($key) . "` = '" . $db->real_escape_string($value) . "',\n";
+            }
+         $query = rtrim($query, " \n,");
+            if (($try = $db->query($query))===false){
+            printf("Invalid query: %s\nWhole query: %s\n", $db->error, $query);
+            exit();
             }
 
-            switch ($type){
-              case 2:
-                $ilsData[$airport_record_id]['loc_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_latitude']);
-                $ilsData[$airport_record_id]['loc_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_longitude']);
-              break;
+      } // end of "if type < 5"
 
-              case 3:
-                $ilsData[$airport_record_id]['gs_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_latitude']);
-                $ilsData[$airport_record_id]['gs_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_longitude']);
-              break;
-
-              case 4:
-                $ilsData[$airport_record_id]['dme_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_latitude']);
-                $ilsData[$airport_record_id]['dme_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_longitude']);
-              break;
-            } // end of switch
-
-         }  // end of "if type < 5"
-
-      foreach ($ilsData as $airport_record_id => $record_value) {
-        $query = "UPDATE ils SET \n";
-        foreach ($record_value as $key => $value) {
-          $query .= "   `" . trim($key) . "` = '" . $db->real_escape_string($value) . "',\n";
-        }
-        $query = rtrim($query, " \n,");
-        $query .= " WHERE airport_site_id='" . $airport_record_id . "'";
-        if (($try = $db->query($query)) === FALSE) {
-          printf("Invalid query: %s\nWhole query: %s\n", $db->error, $query);
-          exit();
-        }
-      }
     } // End of while ($line = fgets($fh)
     $try = $db->query("UPDATE ils set loc_coordinates=Point(loc_decLongitude, loc_decLatitude)");
     $try = $db->query("UPDATE ils set gs_coordinates =Point(gs_decLongitude, gs_decLatitude)");
     $try = $db->query("UPDATE ils set dme_coordinates=Point(dme_decLongitude, dme_decLatitude)");
+    $try = $db->query("UPDATE markerbeacon set mb_coordinates=Point(mb_decLongitude, mb_decLatitude)");
 
     $try = $db->query("create spatial index ix_spatial_loc_data_coord ON ils(loc_coordinates)");
     $try = $db->query("create spatial index ix_spatial_gs_data_coord  ON ils(gs_coordinates)");
     $try = $db->query("create spatial index ix_spatial_dme_data_coord ON ils(dme_coordinates)");
-   } else {
-     echo "Cannot open ILS file $file\n";
-   }
-   fclose($fh);
+    $try = $db->query("create spatial index ix_spatial_mb_data_coord ON markerbeacon(mb_coordinates)");
+  }
+  else {
+    echo "Cannot open ILS file $file\n";
+  }
+  fclose($fh);
 }
-
 
 
 /**
@@ -137,16 +164,17 @@ $stringPositions[4] = array(                                      // ILS Record 
     );
 
 $stringPositions[5] = array(                                      // ILS Record type #5 is Marker Beacon data
+    "aixm_id"          => array("start" => 0,   "length" => 4),   // Main ILS Record Type
     "airport_site_id"  => array("start" => 4,   "length" => 11),  // AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
     "mb_type"          => array("start" => 28,  "length" => 2),   // MB Type (IM, MM, OM) 
-    "mb_status_dme"    => array("start" => 30,  "length" => 22),  // OPERATIONAL STATUS OF MB (OPERATIONAL IFR, DECOMMISSIONED...)
+    "ops_status_mb"    => array("start" => 30,  "length" => 22),  // OPERATIONAL STATUS OF MB (OPERATIONAL IFR, DECOMMISSIONED...)
     "mb_latitude"      => array("start" => 62,  "length" => 14),  // LATITUDE OF MB.(FORMATTED)
     "mb_decLatitude"   => array("start" => 76,  "length" => 11),  // LATITUDE OF MB.(ALL SECONDS)
     "mb_longitude"     => array("start" => 87,  "length" => 14),  // LONGITUDE OF MB.(FORMATTED)
     "mb_decLongitude"  => array("start" => 101, "length" => 11),  // LONGITUDE OF MB.(ALL SECONDS)
     "mb_elevation_10"  => array("start" => 128, "length" => 7),   // ELEVATION OF MB IN TENTH OF A FOOT (MSL)
     "mb_facility"      => array("start" => 135, "length" => 15),  // FACILITY/TYPE OF MARKER/LOCATOR (Ex: MARKER, NDB)
-    "mb_name"          => array("start" => 182, "length" => 3),   // NAME OF THE MARKER LOCATOR BEACON (Ex. VIOLE)
+    "mb_name"          => array("start" => 152, "length" => 30),  // NAME OF THE MARKER LOCATOR BEACON (Ex. VIOLE)
     );
 
 return($stringPositions);

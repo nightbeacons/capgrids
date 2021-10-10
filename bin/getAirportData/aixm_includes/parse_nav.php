@@ -12,12 +12,16 @@ global $db;
 
 $stringPositions = array(
     "id"               => array("start" => 4,   "length" => 4),
+    "name"             => array("start" => 42,  "length" => 30),
     "type"             => array("start" => 8,   "length" => 20),
     "status"           => array("start" => 766, "length" => 30),
     "public"           => array("start" => 280, "length" => 1),
     "class"            => array("start" => 281, "length" => 11),
     "frequency"        => array("start" => 533, "length" => 6),
+    "voice_call"       => array("start" => 499, "length" => 30),
     "power"            => array("start" => 491, "length" => 4),
+    "vor_svc_vol"      => array("start" => 576, "length" => 2),
+    "dme_svc_vol"      => array("start" => 578, "length" => 2),
     "city"             => array("start" => 72,  "length" => 40),
     "state"            => array("start" => 112, "length" => 30),
     "latitude"         => array("start" => 370, "length" => 13),
@@ -26,6 +30,7 @@ $stringPositions = array(
     "longitude"        => array("start" => 396,  "length" => 13),
     "E_W"              => array("start" => 409,  "length" => 1),
     "decLongitude"     => array("start" => 410,  "length" => 10),
+    "elevation_10"     => array("start" => 472,  "length" => 7),
     );
 
 $query = "DELETE FROM nav";
@@ -63,6 +68,8 @@ $fh = fopen($file, "r");
        } // End of while ($line = fgets($fh)
    $try = $db->query("UPDATE nav set coordinates=Point(decLongitude, decLatitude)");
    $try = $db->query("create spatial index ix_spatial_nav_data_coord ON nav(coordinates)");
+
+   $try = $db->query("UPDATE nav SET range_nm='25' WHERE (type = 'NDB' OR type='NDB/DME') and class regexp 'MH'");
 
      }
 
