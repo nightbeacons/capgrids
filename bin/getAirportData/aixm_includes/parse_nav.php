@@ -27,10 +27,11 @@ $stringPositions = array(
     "latitude"         => array("start" => 370, "length" => 13),
     "N_S"              => array("start" => 383, "length" => 1),
     "decLatitude"      => array("start" => 385, "length" => 10),
-    "longitude"        => array("start" => 396,  "length" => 13),
-    "E_W"              => array("start" => 409,  "length" => 1),
-    "decLongitude"     => array("start" => 410,  "length" => 10),
-    "elevation_10"     => array("start" => 472,  "length" => 7),
+    "longitude"        => array("start" => 396, "length" => 13),
+    "E_W"              => array("start" => 409, "length" => 1),
+    "decLongitude"     => array("start" => 410, "length" => 10),
+    "elevation_10"     => array("start" => 472, "length" => 7),
+    "mag_variation"    => array("start" => 479, "length" => 5),
     );
 
 $query = "DELETE FROM nav";
@@ -53,6 +54,9 @@ $fh = fopen($file, "r");
             if ($navData['E_W'] == 'W') {$navData['decLongitude'] = -(abs($navData['decLongitude']));}
          $navData['decLatitude']  = $navData['decLatitude']  / 3600.00;
          $navData['decLongitude'] = $navData['decLongitude'] / 3600.00;
+         $magvar_aixm = trim($navData['mag_variation']);
+            if (substr(trim($magvar_aixm), -1) == "E") { $navData['mag_variation'] = intval(substr($magvar_aixm, 0, -1));}
+            if (substr(trim($magvar_aixm), -1) == "W") { $navData['mag_variation'] = -intval(substr($magvar_aixm, 0, -1));}
 
          $query = "INSERT INTO nav SET \n";
             foreach($navData as $key => $value){
