@@ -32,40 +32,43 @@ function parseIlsFile($file) {
 
         $airport_record_id = trim(substr($line, 4, 11));
         $escaped_airport_record_id = $db->real_escape_string($airport_record_id);
-        $q_init = "INSERT INTO ils(airport_site_id) VALUES ('" . $escaped_airport_record_id . "')
-                    ON DUPLICATE KEY UPDATE airport_site_id=airport_site_id";
+        $runway_end = trim(substr($line, 15, 3));
+        $ils_type = trim(substr($line, 18, 10)); 
+        $ils_unique_key = $airport_record_id . "+" . $runway_end . "+" . $ils_type; 
+        $q_init = "INSERT INTO ils(ils_unique_key) VALUES ('" . $ils_unique_key . "')
+                    ON DUPLICATE KEY UPDATE ils_unique_key=ils_unique_key";
 
         $try = $db->query($q_init);
         // Put each value into an array, so data can be manipulated before inserting into DB.
         foreach ($stringPositions[$type] as $key => $position) {
           $value = trim(substr($line, $position['start'], $position['length']));
-          $ilsData[$airport_record_id][trim($key)] = $value;
+          $ilsData[$ils_unique_key][trim($key)] = $value;
         }
 
         switch ($type) {
           case 2:
-            $ilsData[$airport_record_id]['loc_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_latitude']);
-            $ilsData[$airport_record_id]['loc_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['loc_longitude']);
+            $ilsData[$ils_unique_key]['loc_decLatitude']  = convertToDecimalDegrees($ilsData[$ils_unique_key]['loc_latitude']);
+            $ilsData[$ils_unique_key]['loc_decLongitude'] = convertToDecimalDegrees($ilsData[$ils_unique_key]['loc_longitude']);
             break;
 
           case 3:
-            $ilsData[$airport_record_id]['gs_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_latitude']);
-            $ilsData[$airport_record_id]['gs_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['gs_longitude']);
+            $ilsData[$ils_unique_key]['gs_decLatitude']  = convertToDecimalDegrees($ilsData[$ils_unique_key]['gs_latitude']);
+            $ilsData[$ils_unique_key]['gs_decLongitude'] = convertToDecimalDegrees($ilsData[$ils_unique_key]['gs_longitude']);
             break;
 
           case 4:
-            $ilsData[$airport_record_id]['dme_decLatitude']  = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_latitude']);
-            $ilsData[$airport_record_id]['dme_decLongitude'] = convertToDecimalDegrees($ilsData[$airport_record_id]['dme_longitude']);
+            $ilsData[$ils_unique_key]['dme_decLatitude']  = convertToDecimalDegrees($ilsData[$ils_unique_key]['dme_latitude']);
+            $ilsData[$ils_unique_key]['dme_decLongitude'] = convertToDecimalDegrees($ilsData[$ils_unique_key]['dme_longitude']);
             break;
         } // end of switch
 
-        foreach ($ilsData as $airport_record_id => $record_value) {
+        foreach ($ilsData as $ils_unique_key => $record_value) {
           $query = "UPDATE ils SET \n";
           foreach ($record_value as $key => $value) {
-            $query .= "   `" . trim($key) . "` = '" . $db->real_escape_string($value) . "',\n";
+            $query .= "   `" . trim($key) . "` = '" . trim($db->real_escape_string($value)) . "',\n";
           }
           $query = rtrim($query, " \n,");
-          $query .= " WHERE airport_site_id='" . $airport_record_id . "'";
+          $query .= " WHERE ils_unique_key='" . $ils_unique_key . "'";
           if (($try = $db->query($query)) === FALSE) {
             printf("Invalid query: %s\nWhole query: %s\n", $db->error, $query);
             exit();
@@ -84,7 +87,7 @@ function parseIlsFile($file) {
 
          $query = "INSERT INTO markerbeacon SET \n";
             foreach($mbData as $key => $value){
-            $query .= "   `" . trim($key) . "` = '" . $db->real_escape_string($value) . "',\n";
+            $query .= "   `" . trim($key) . "` = '" . trim($db->real_escape_string($value)) . "',\n";
             }
          $query = rtrim($query, " \n,");
             if (($try = $db->query($query))===false){
@@ -115,6 +118,7 @@ function parseIlsFile($file) {
 /**
  * Initialize ithe ILS Position array
  * Return the array
+ * All records contain aixm_id, airport_site_id, runway_end_id and system_type
  */
 function initIlsStringPositions(){
 $stringPositions = array();
@@ -122,8 +126,9 @@ $stringPositions = array();
 $stringPositions[1] = array(
     "aixm_id"          => array("start" => 0,   "length" => 4), // Main ILS Record Type
     "airport_site_id"  => array("start" => 4,   "length" => 11),// AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
+    "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
     "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )	
-    "ils_identifier"   => array("start" => 28,  "length" => 4), // IDENTIFIER IS PREFIXED BY I-
+    "ils_identifier"   => array("start" => 28,  "length" => 6), // IDENTIFIER IS PREFIXED BY I-
     "airport"          => array("start" => 159, "length" => 4), // AIRPORT IDENTIFIER
     "category"         => array("start" => 172, "length" => 9), // CATEGORY OF THE ILS. (I,II,IIIA)
     "approach_bearing" => array("start" => 281, "length" => 6), // ILS APPROACH BEARING IN DEGREES MAGNETIC
@@ -131,7 +136,10 @@ $stringPositions[1] = array(
     );
 
 $stringPositions[2] = array(                                     // ILS Record type #2 is LOC data
+    "aixm_id"          => array("start" => 0,   "length" => 4), // Main ILS Record Type
+    "airport_site_id"  => array("start" => 4,   "length" => 11),// AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
     "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
+    "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "ops_status_loc"   => array("start" => 28,  "length" => 22), // OPERATIONAL STATUS OF LOCALIZER (OPERATIONAL IFR, DECOMMISSIONED...) 
     "loc_latitude"     => array("start" => 60,  "length" => 14), // LATITUDE OF LOCALIZER ANTENNA.(FORMATTED)
     "loc_decLatitude"  => array("start" => 74,  "length" => 11), // LATITUDE OF LOCALIZER ANTENNA.(ALL SECONDS)
@@ -142,6 +150,10 @@ $stringPositions[2] = array(                                     // ILS Record t
     );
 
 $stringPositions[3] = array(                                     // ILS Record type #3 is GS data
+    "aixm_id"          => array("start" => 0,   "length" => 4), // Main ILS Record Type
+    "airport_site_id"  => array("start" => 4,   "length" => 11),// AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
+    "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
+    "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "ops_status_gs"   => array("start" => 28,  "length" => 22),  // OPERATIONAL STATUS OF GS (OPERATIONAL IFR, DECOMMISSIONED...)
     "gs_latitude"     => array("start" => 60,  "length" => 14),  // LATITUDE OF GLIDESLOPE ANTENNA.(FORMATTED)
     "gs_decLatitude"  => array("start" => 74,  "length" => 11),  // LATITUDE OF GLIDESLOPE ANTENNA.(ALL SECONDS)
@@ -154,6 +166,10 @@ $stringPositions[3] = array(                                     // ILS Record t
     );
 
 $stringPositions[4] = array(                                      // ILS Record type #4 is DME data
+    "aixm_id"          => array("start" => 0,   "length" => 4), // Main ILS Record Type
+    "airport_site_id"  => array("start" => 4,   "length" => 11),// AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
+    "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
+    "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "ops_status_dme"   => array("start" => 28,  "length" => 22),  // OPERATIONAL STATUS OF DME (OPERATIONAL IFR, DECOMMISSIONED...)
     "dme_latitude"     => array("start" => 60,  "length" => 14),  // LATITUDE OF DME ANTENNA.(FORMATTED)
     "dme_decLatitude"  => array("start" => 74,  "length" => 11),  // LATITUDE OF DME ANTENNA.(ALL SECONDS)
@@ -166,6 +182,8 @@ $stringPositions[4] = array(                                      // ILS Record 
 $stringPositions[5] = array(                                      // ILS Record type #5 is Marker Beacon data
     "aixm_id"          => array("start" => 0,   "length" => 4),   // Main ILS Record Type
     "airport_site_id"  => array("start" => 4,   "length" => 11),  // AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
+    "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
+    "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "mb_type"          => array("start" => 28,  "length" => 2),   // MB Type (IM, MM, OM) 
     "ops_status_mb"    => array("start" => 30,  "length" => 22),  // OPERATIONAL STATUS OF MB (OPERATIONAL IFR, DECOMMISSIONED...)
     "mb_latitude"      => array("start" => 62,  "length" => 14),  // LATITUDE OF MB.(FORMATTED)

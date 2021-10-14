@@ -11,6 +11,7 @@ function parseAptFile($file){
 global $db;
 
 $stringPositions = array(
+    "aixm_key"         => array("start" => 3,    "length" => 11),        
     "name"             => array("start" => 133,  "length" => 50),
     "ICAOcode"         => array("start" => 1210, "length" => 4),
     "aptCode"          => array("start" => 27,   "length" => 4),
