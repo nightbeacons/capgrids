@@ -167,11 +167,13 @@ function loc_build (){
       if ($bearing >= 360){$bearing -= 360.0; }
     $bearing = sprintf("%7.3f", $bearing);
     $runway = $row['runway_end_id'];
-    $range = "NA";
+    $range = "18";
+    $ils_identifier = str_replace("-", "", $row['ils_identifier']);
     $airport = sprintf("%-4s", $row['ICAOcode']);
     $name  = trim($row['system_type']) . " " . trim($row['category']);
       if ($category != ''){$name = "ILS-cat-" . $category;}
-    $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing  $airport $runway $name\n";
+      if (substr($row['system_type'], 0, 3) == 'LOC') {$name="LOC";}
+    $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing $ils_identifier  $airport $runway $name\n";
   }
 
 
