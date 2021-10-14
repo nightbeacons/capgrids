@@ -12,10 +12,13 @@ if (mysqli_connect_errno()) {
 
 $output_file = "nav.dat";
 
-$ndb = ndb_build();
-$vor = vor_build();
+//$ndb = ndb_build();
+//echo $ndb;
+//$vor = vor_build();
+//echo $vor;
 
-echo $vor;
+$loc = loc_build();
+echo $loc;
 
 /**
  * function ndb_build()
@@ -76,7 +79,7 @@ function ndb_build() {
  *  Column 3:  latitude of VOR (identical to NDB format)
  *  Column 16: longitude of VOR (identical to NDB format)
  *  Column 32: elevation in MSL. (identical to NDB format)
- *  Column 39: Frequency (MkHz) multiplied by 100, integer. Right-aligned to Col 42
+ *  Column 39: Frequency (MHz) multiplied by 100, integer. Right-aligned to Col 42
  *  Column 43: Range (NM), integer. Maximum reception range, NM, right-aligned
  *             If empty, set to "L"
  *  Column 50: Slaved mag variation, up to 3 decimal places
@@ -121,3 +124,57 @@ function vor_build() {
 return($vor);
 }
 
+/**
+ * function loc_build()
+ * Create the "4" and "5" LOC records
+ *  Uses the 'ils' MySQL table
+ * Record type "4" handles LOC that is attached to an ILS ("class" is non-empty)
+ * Record type "5" handles others
+ * Record format for LOC is:
+ *  Column 1:  4
+ *  Column 3:  latitude of LOC (identical to VOR and NDB format)
+ *  Column 16: longitude of LOC (identical to VOR and NDB format)
+ *  Column 32: elevation in MSL. (identical to VOR and NDB format)
+ *  Column 39: Frequency (MHz) multiplied by 100, integer. (Identical to VOR format)
+ *  Column 43: Range (NM), integer. (Identical to VOR format)
+ *  Column   : Localizer bearing in TRUE degrees, up to three decimal places
+ *  Column   : Localizer Identifier, Up to 4 chars (usually begins with "I")
+ *  Column   : Airport ICAO code, up to 4 characters
+ *  Column   : Localizer name (Use “ILS-cat-I”, “ILS-cat-II”, “ILS-cat-III”, “LOC”, “LDA” or “SDF”)
+ */
+function loc_build (){
+  global $db;
+  $loc = "";
+  $query = "SELECT ils.airport, apt.ICAOcode,  ils.system_type, ils.loc_elevation_10,
+              ils.loc_decLatitude, ils.loc_decLongitude, ils.loc_frequency, 
+              ils.ops_status_loc, ils.approach_bearing, ils.runway_end_id, 
+              ils.ils_identifier, ils.category, ils.mag_variation 
+            FROM ils
+            LEFT JOIN apt ON ils.airport_site_id = apt.aixm_key
+            WHERE ils.ops_status_loc regexp 'OPERATIONAL'
+            ORDER BY ils.category DESC"; 
+  $r1 = $db->query($query);
+
+  while ($row = $r1->fetch_assoc()) {
+    $category = trim($row['category']);
+    $record_type = ($category == '') ? 5 : 4;
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['loc_decLatitude'])));
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['loc_decLongitude']));
+    $elevation = sprintf("%6s", (($row['loc_elevation_10'] == '') ? 0 : (intval($row['loc_elevation_10']))));
+    $frequency = intval($row['loc_frequency'] * 100);
+    $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
+    $bearing = $row['approach_bearing'] + $mag_variation;
+      if ($bearing >= 360){$bearing -= 360.0; }
+    $bearing = sprintf("%7.3f", $bearing);
+    $runway = $row['runway_end_id'];
+    $range = "NA";
+    $airport = sprintf("%-4s", $row['ICAOcode']);
+    $name  = trim($row['system_type']) . " " . trim($row['category']);
+      if ($category != ''){$name = "ILS-cat-" . $category;}
+    $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing  $airport $runway $name\n";
+  }
+
+
+return($loc);
+
+}
