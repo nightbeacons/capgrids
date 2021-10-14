@@ -152,12 +152,13 @@ function loc_build (){
             FROM ils
             LEFT JOIN apt ON ils.airport_site_id = apt.aixm_key
             WHERE ils.ops_status_loc regexp 'OPERATIONAL'
-            ORDER BY ils.category DESC"; 
+            ORDER BY ils.category DESC, apt.ICAOcode ASC, ils.approach_bearing ASC"; 
   $r1 = $db->query($query);
 
   while ($row = $r1->fetch_assoc()) {
     $category = trim($row['category']);
     $record_type = ($category == '') ? 5 : 4;
+    $category = str_replace('IIIB', 'III', $category);
     $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['loc_decLatitude'])));
     $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['loc_decLongitude']));
     $elevation = sprintf("%6s", (($row['loc_elevation_10'] == '') ? 0 : (intval($row['loc_elevation_10']))));
@@ -165,15 +166,15 @@ function loc_build (){
     $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
     $bearing = $row['approach_bearing'] + $mag_variation;
       if ($bearing >= 360){$bearing -= 360.0; }
-    $bearing = sprintf("%7.3f", $bearing);
-    $runway = $row['runway_end_id'];
-    $range = "18";
-    $ils_identifier = str_replace("-", "", $row['ils_identifier']);
+    $bearing = sprintf("%11s", sprintf("%7.3f", $bearing));
+    $runway = sprintf("%-3s", $row['runway_end_id']);
+    $range = " 18";
+    $ils_identifier = sprintf("%4s", str_replace("-", "", $row['ils_identifier']));
     $airport = sprintf("%-4s", $row['ICAOcode']);
     $name  = trim($row['system_type']) . " " . trim($row['category']);
       if ($category != ''){$name = "ILS-cat-" . $category;}
       if (substr($row['system_type'], 0, 3) == 'LOC') {$name="LOC";}
-    $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing $ils_identifier  $airport $runway $name\n";
+    $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing $ils_identifier $airport $runway $name\n";
   }
 
 
