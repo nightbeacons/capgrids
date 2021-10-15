@@ -10,8 +10,8 @@ include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_ils.php";
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 
 // DB table names are lc versions of filenames
-//$files_to_process = array('APT', 'NAV', 'FIX');
-$files_to_process = array('ILS');
+$files_to_process = array('APT', 'NAV', 'FIX', 'ILS');
+// $files_to_process = array('ILS');
 
 
 $workDir = "/tmp/aixm/";
