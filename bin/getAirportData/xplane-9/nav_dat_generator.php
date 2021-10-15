@@ -16,9 +16,11 @@ $output_file = "nav.dat";
 //echo $ndb;
 //$vor = vor_build();
 //echo $vor;
+//$loc = loc_build();
+//echo $loc;
 
-$loc = loc_build();
-echo $loc;
+$gs = gs_build();
+echo $gs;
 
 /**
  * function ndb_build()
@@ -165,6 +167,7 @@ function loc_build (){
     $frequency = intval($row['loc_frequency'] * 100);
     $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
     $bearing = $row['approach_bearing'] + $mag_variation;
+      if ($bearing < 0) {$bearing += 360.0;}
       if ($bearing >= 360){$bearing -= 360.0; }
     $bearing = sprintf("%11s", sprintf("%7.3f", $bearing));
     $runway = sprintf("%-3s", $row['runway_end_id']);
@@ -176,8 +179,64 @@ function loc_build (){
       if (substr($row['system_type'], 0, 3) == 'LOC') {$name="LOC";}
     $loc .= "$record_type $latitude $longitude $elevation $frequency $range $bearing $ils_identifier $airport $runway $name\n";
   }
-
-
 return($loc);
+}
+
+/**
+ * function gs_build()
+ * Create the "6"  GS records
+ *  Uses the 'ils' MySQL table
+ * Record format for GS is:
+ *  Column 1:  6
+ *  Column 3:  latitude of LOC (identical to VOR and NDB format)
+ *  Column 16: longitude of LOC (identical to VOR and NDB format)
+ *  Column 32: elevation in MSL. (identical to VOR and NDB format)
+ *  Column 39: Frequency (MHz) multiplied by 100, integer. (Identical to VOR format)
+ *             Note: This nneds to be the Localizer freq, not the GS frequency
+ *  Column 43: Range (NM), integer. (Identical to VOR format)
+ *  Column   : Localizer bearing in TRUE degrees, up to three decimal places, prefixed with GS angle
+ *             (Glideslope of 3.25 degrees on heading of 123.456 becomes 325123.456)
+ *  Column   : GS Identifier, Up to 4 chars (usually begins with "I")
+ *  Column   : Airport ICAO code, up to 4 characters
+ *  Column   : Runway number
+ *  Column   : "GS"
+ */
+
+function gs_build() {
+  global $db;
+  $gs = "";
+  $query = "SELECT ils.airport, apt.ICAOcode,  ils.system_type, ils.gs_type, ils.gs_elevation_10,
+              ils.gs_decLatitude, ils.gs_decLongitude, ils.loc_frequency,
+              ils.ops_status_gs, ils.gs_angle, ils.runway_end_id,
+              ils.ils_identifier, ils.category, ils.approach_bearing, ils.mag_variation
+            FROM ils
+            LEFT JOIN apt ON ils.airport_site_id = apt.aixm_key
+            WHERE ils.ops_status_gs regexp 'OPERATIONAL'
+            ORDER BY apt.ICAOcode ASC, ils.approach_bearing DESC";
+  $r1 = $db->query($query);
+  while ($row = $r1->fetch_assoc()) {
+    $record_type = 6;
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['gs_decLatitude'])));
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['gs_decLongitude']));
+    $elevation = sprintf("%6s", (($row['gs_elevation_10'] == '') ? 0 : (intval($row['gs_elevation_10']))));
+    $angle = sprintf("%3.0f", ($row['gs_angle'] * 100));
+    $frequency = intval($row['loc_frequency'] * 100);
+    $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
+    $bearing = $row['approach_bearing'] + $mag_variation;
+      if ($bearing < 0) {$bearing += 360.0;}
+      if ($bearing >= 360){$bearing -= 360.0; }
+    $bearing = sprintf("%07.3f", $bearing);
+    $angle_with_bearing = " " . $angle . $bearing;
+//    $bearing = sprintf("%11s", sprintf("%07.3f", $bearing));
+    $runway = sprintf("%-3s", $row['runway_end_id']);
+    $range = " 10";
+    $ils_identifier = sprintf("%4s", str_replace("-", "", $row['ils_identifier']));
+    $airport = sprintf("%-4s", $row['ICAOcode']);
+    $name  = "GS";
+
+    $gs .= "$record_type $latitude $longitude $elevation $frequency $range $angle_with_bearing $ils_identifier $airport $runway $name\n";
+  }
+
+return($gs);
 
 }
