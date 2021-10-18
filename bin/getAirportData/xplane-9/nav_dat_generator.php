@@ -18,9 +18,11 @@ $output_file = "nav.dat";
 //echo $vor;
 //$loc = loc_build();
 //echo $loc;
+// $gs = gs_build();
+//echo $gs;
+$mb = mb_build();
+echo $mb;
 
-$gs = gs_build();
-echo $gs;
 
 /**
  * function ndb_build()
@@ -194,7 +196,7 @@ return($loc);
  *  Column 39: Frequency (MHz) multiplied by 100, integer. (Identical to VOR format)
  *             Note: This nneds to be the Localizer freq, not the GS frequency
  *  Column 43: Range (NM), integer. (Identical to VOR format)
- *  Column   : Localizer bearing in TRUE degrees, up to three decimal places, prefixed with GS angle
+ *  Column   : Bbearing in TRUE degrees, up to three decimal places, prefixed with GS angle
  *             (Glideslope of 3.25 degrees on heading of 123.456 becomes 325123.456)
  *  Column   : GS Identifier, Up to 4 chars (usually begins with "I")
  *  Column   : Airport ICAO code, up to 4 characters
@@ -240,3 +242,53 @@ function gs_build() {
 return($gs);
 
 }
+
+
+/** 
+ * function mb_build()
+ * Create the "7", "8" and "9"  Marker Beacon records
+ */
+
+function mb_build(){
+  global $db;
+  $marker_type_map = array(
+             "OM" => 7,
+             "MM" => 8,
+             "IM" => 9
+           );
+  $mb="";
+  $query = "SELECT ICAOcode, system_type, mb_type, mb_elevation_10,
+              mb_decLatitude, mb_decLongitude,
+              ops_status_mb, runway_end_id,
+              mb_facility, mb_name,
+              approach_bearing, mag_variation
+            FROM markerbeacon
+            WHERE ops_status_mb regexp 'OPERATIONAL'
+            ORDER BY  mb_type DESC, ICAOcode ASC";
+  $r1 = $db->query($query);
+  while ($row = $r1->fetch_assoc()) {
+    $record_type = $marker_type_map[$row['mb_type']];
+    $marker_type = trim($row['mb_type']);
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['mb_decLatitude'])));
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['mb_decLongitude']));
+    $elevation = sprintf("%6s", (($row['mb_elevation_10'] == '') ? 0 : (intval($row['mb_elevation_10']))));
+    $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
+    $bearing = $row['approach_bearing'] + $mag_variation;
+      if ($bearing < 0) {$bearing += 360.0;}
+      if ($bearing >= 360){$bearing -= 360.0; }
+    $bearing = sprintf("%7.3f", $bearing);
+    $runway = sprintf("%-3s", $row['runway_end_id']);
+    $airport = sprintf("%-4s", $row['ICAOcode']);
+
+    $unused  = "    0   0    ";
+
+
+    $mb .= "$record_type $latitude $longitude $elevation $unused $bearing ---- $airport $runway $marker_type\n";
+
+  }
+return ($mb);
+
+}
+
+
+ 

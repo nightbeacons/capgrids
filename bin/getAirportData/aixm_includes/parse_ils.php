@@ -18,6 +18,7 @@ function parseIlsFile($file) {
   $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_loc_data_coord");
   $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_gs_data_coord");
   $try = $db->query("ALTER TABLE ils DROP INDEX ix_spatial_dme_data_coord");
+  $try = $db->query("ALTER TABLE markerbeacon DROP INDEX ix_spatial_mb_data_coord");
 
   $fh = fopen($file, "r");
   if ($fh) {
@@ -82,8 +83,14 @@ function parseIlsFile($file) {
             $value = trim(substr($line, $position['start'], $position['length']));
             $mbData[trim($key)] = $value;
             }
+            $airport_record_id = trim($mbData['airport_site_id']);
+            $escaped_airport_record_id = $db->real_escape_string($airport_record_id);
+            $runway_end = trim($mbData['runway_end_id']);
+            $ils_type = trim($mbData['ils_system_type']);
+            $mbData['ils_unique_key'] = $airport_record_id . "+" . $runway_end . "+" . $ils_type;
             $mbData['mb_decLatitude']  = convertToDecimalDegrees($mbData['mb_latitude']);
             $mbData['mb_decLongitude'] = convertToDecimalDegrees($mbData['mb_longitude']);
+
 
          $query = "INSERT INTO markerbeacon SET \n";
             foreach($mbData as $key => $value){
@@ -112,6 +119,18 @@ function parseIlsFile($file) {
     echo "Cannot open ILS file $file\n";
   }
   fclose($fh);
+
+// Add to markerbeacon table
+   $query = "UPDATE markerbeacon
+            INNER JOIN apt ON markerbeacon.airport_site_id = apt.aixm_key
+            SET markerbeacon.ICAOcode = apt.ICAOcode";
+   $try = $db->query($query);
+
+   $query = "UPDATE markerbeacon
+             INNER JOIN ils ON markerbeacon.ils_unique_key = ils.ils_unique_key
+             SET markerbeacon.approach_bearing = ils.approach_bearing, 
+                 markerbeacon.mag_variation=ils.mag_variation";
+   $try = $db->query($query);
 }
 
 
@@ -182,6 +201,7 @@ $stringPositions[4] = array(                                      // ILS Record 
 $stringPositions[5] = array(                                      // ILS Record type #5 is Marker Beacon data
     "aixm_id"          => array("start" => 0,   "length" => 4),   // Main ILS Record Type
     "airport_site_id"  => array("start" => 4,   "length" => 11),  // AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)
+    "ils_system_type"  => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "runway_end_id"    => array("start" => 15,  "length" => 3),  // ILS RUNWAY END IDENTIFIER. (EX: 18,36L)
     "system_type"      => array("start" => 18,  "length" => 10), // ILS SYSTEM TYPE (ILS, SDF . . . )
     "mb_type"          => array("start" => 28,  "length" => 2),   // MB Type (IM, MM, OM) 
