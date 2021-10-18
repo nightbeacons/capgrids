@@ -11,14 +11,13 @@ if (mysqli_connect_errno()) {
 
 
 $output_file = "nav.dat";
-
 //$ndb = ndb_build();
 //echo $ndb;
 //$vor = vor_build();
 //echo $vor;
 //$loc = loc_build();
 //echo $loc;
-// $gs = gs_build();
+//$gs = gs_build();
 //echo $gs;
 $mb = mb_build();
 echo $mb;
@@ -257,6 +256,7 @@ function mb_build(){
              "IM" => 9
            );
   $mb="";
+  $hold_elevation=0;
   $query = "SELECT ICAOcode, system_type, mb_type, mb_elevation_10,
               mb_decLatitude, mb_decLongitude,
               ops_status_mb, runway_end_id,
@@ -272,6 +272,7 @@ function mb_build(){
     $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['mb_decLatitude'])));
     $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['mb_decLongitude']));
     $elevation = sprintf("%6s", (($row['mb_elevation_10'] == '') ? 0 : (intval($row['mb_elevation_10']))));
+      if ($elevation > 0){$hold_elevation=$elevation;}
     $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
     $bearing = $row['approach_bearing'] + $mag_variation;
       if ($bearing < 0) {$bearing += 360.0;}
@@ -283,7 +284,7 @@ function mb_build(){
     $unused  = "    0   0    ";
 
 
-    $mb .= "$record_type $latitude $longitude $elevation $unused $bearing ---- $airport $runway $marker_type\n";
+    $mb .= "$record_type $latitude $longitude $hold_elevation $unused $bearing ---- $airport $runway $marker_type\n";
 
   }
 return ($mb);
