@@ -114,6 +114,7 @@ function parseIlsFile($file) {
     $try = $db->query("create spatial index ix_spatial_gs_data_coord  ON ils(gs_coordinates)");
     $try = $db->query("create spatial index ix_spatial_dme_data_coord ON ils(dme_coordinates)");
     $try = $db->query("create spatial index ix_spatial_mb_data_coord ON markerbeacon(mb_coordinates)");
+    $try = $db->query("UPDATE ils set dme_bias = 0 where dme_bias=''");
   }
   else {
     echo "Cannot open ILS file $file\n";
@@ -194,6 +195,8 @@ $stringPositions[4] = array(                                      // ILS Record 
     "dme_decLatitude"  => array("start" => 74,  "length" => 11),  // LATITUDE OF DME ANTENNA.(ALL SECONDS)
     "dme_longitude"    => array("start" => 85,  "length" => 14),  // LONGITUDE OF DME ANTENNA.(FORMATTED)
     "dme_decLongitude" => array("start" => 99,  "length" => 11),  // LONGITUDE OF DME ANTENNA.(ALL SECONDS)
+    "dme_bias"         => array("start" => 112, "length" => 7),   // DISTANCE OF DME TRANSMITTER ANTENNA FROM APPROACH END OF RUNWAY.(FEET)
+                                                                  // BIAS MUST BE CONVERTED TO NM
     "dme_elevation_10" => array("start" => 126, "length" => 7),   // ELEVATION OF DME ANTENNA IN TENTH OF A FOOT (MSL)
     "dme_channel"      => array("start" => 133, "length" => 4),   // CHANNEL ON WHICH DISTANCE DATA IS TRANSMITTED (EX:  032X, 038X)
     );
