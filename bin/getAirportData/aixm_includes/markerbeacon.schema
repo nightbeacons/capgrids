@@ -25,9 +25,13 @@ DROP TABLE IF EXISTS `markerbeacon`;
 CREATE TABLE `markerbeacon` (
   `aixm_id` varchar(4) DEFAULT NULL COMMENT 'AIXM Identifier',
   `ils_unique_key` varchar(26) NOT NULL COMMENT 'Unique ILS ident, airport site number + runway + ILS type',
+  `ils_system_type` varchar(10) DEFAULT NULL COMMENT 'ILS SYSTEM TYPE (ILS, SDF . . . )',
   `airport_site_id` varchar(11) DEFAULT NULL COMMENT 'AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)',
   `system_type` varchar(10) DEFAULT NULL COMMENT 'ILS SYSTEM TYPE (ILS, SDF . . . )',
   `runway_end_id` varchar(3) DEFAULT NULL COMMENT 'ILS RUNWAY END IDENTIFIER. (EX: 18,36L)',
+  `ICAOcode` varchar(6) DEFAULT NULL COMMENT 'Airport ICAO Code (optional)',
+  `approach_bearing` varchar(6) DEFAULT NULL COMMENT 'ILS APPROACH BEARING IN DEGREES MAGNETIC',
+  `mag_variation` varchar(6) DEFAULT NULL COMMENT 'Magnetic Variation (Ex. 09E)',
   `mb_type` varchar(2) DEFAULT NULL COMMENT 'MB Type (IM, MM, OM)',
   `ops_status_mb` varchar(22) DEFAULT NULL COMMENT 'OPERATIONAL STATUS OF MB (OPERATIONAL IFR, DECOMMISSIONED...)',
   `mb_latitude` varchar(15) DEFAULT NULL COMMENT 'LATITUDE OF MB.(FORMATTED)',
@@ -37,7 +41,8 @@ CREATE TABLE `markerbeacon` (
   `mb_elevation_10` varchar(7) DEFAULT NULL COMMENT 'ELEVATION OF MB ANTENNA IN TENTH OF A FOOT (MSL)',
   `mb_facility` varchar(15) DEFAULT NULL COMMENT 'FACILITY/TYPE OF MARKER/LOCATOR (Ex: MARKER, NDB)',
   `mb_name` varchar(30) DEFAULT NULL COMMENT 'NAME OF THE MARKER LOCATOR BEACON (Ex. VIOLE)',
-  `mb_coordinates` point DEFAULT NULL
+  `mb_coordinates` point NOT NULL,
+  KEY `AIXM_AIRPORT_ID` (`airport_site_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -59,4 +64,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-14  3:45:08
+-- Dump completed on 2021-10-17 18:37:49

@@ -38,7 +38,7 @@ CREATE TABLE `nav` (
   `elevation_10` varchar(7) DEFAULT NULL COMMENT 'ELEVATION OF ANTENNA IN TENTH OF A FOOT (MSL)',
   `vor_svc_vol` varchar(2) DEFAULT NULL COMMENT 'VOR Service Volume',
   `dme_svc_vol` varchar(2) DEFAULT NULL COMMENT 'DME Service Volume',
-  `mag_variation` varchar(4) DEFAULT NULL COMMENT 'Magnetic Variation',
+  `mag_variation` varchar(5) DEFAULT NULL COMMENT 'Magnetic Variation',
   `latitude` varchar(15) NOT NULL,
   `N_S` varchar(1) NOT NULL DEFAULT 'N',
   `decLatitude` double NOT NULL,
@@ -68,4 +68,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-11 17:51:48
+-- Dump completed on 2021-10-17 18:39:41
