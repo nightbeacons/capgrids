@@ -11,16 +11,18 @@ if (mysqli_connect_errno()) {
 
 
 $output_file = "nav.dat";
-//$ndb = ndb_build();
+$ndb = ndb_build();
 //echo $ndb;
-//$vor = vor_build();
+$vor = vor_build();
 //echo $vor;
-//$loc = loc_build();
+$loc = loc_build();
 //echo $loc;
-//$gs = gs_build();
+$gs = gs_build();
 //echo $gs;
 $mb = mb_build();
-echo $mb;
+//echo $mb;
+$dme = dme_build();
+echo $dme;
 
 
 /**
@@ -148,14 +150,13 @@ return($vor);
 function loc_build (){
   global $db;
   $loc = "";
-  $query = "SELECT ils.airport, apt.ICAOcode,  ils.system_type, ils.loc_elevation_10,
-              ils.loc_decLatitude, ils.loc_decLongitude, ils.loc_frequency, 
-              ils.ops_status_loc, ils.approach_bearing, ils.runway_end_id, 
-              ils.ils_identifier, ils.category, ils.mag_variation 
+  $query = "SELECT airport, ICAOcode, system_type, loc_elevation_10,
+              loc_decLatitude, loc_decLongitude, loc_frequency, 
+              ops_status_loc, approach_bearing, runway_end_id, 
+              ils_identifier, category, mag_variation 
             FROM ils
-            LEFT JOIN apt ON ils.airport_site_id = apt.aixm_key
-            WHERE ils.ops_status_loc regexp 'OPERATIONAL'
-            ORDER BY ils.category DESC, apt.ICAOcode ASC, ils.approach_bearing ASC"; 
+            WHERE ops_status_loc regexp 'OPERATIONAL'
+            ORDER BY category DESC, ICAOcode ASC, approach_bearing ASC"; 
   $r1 = $db->query($query);
 
   while ($row = $r1->fetch_assoc()) {
@@ -206,14 +207,13 @@ return($loc);
 function gs_build() {
   global $db;
   $gs = "";
-  $query = "SELECT ils.airport, apt.ICAOcode,  ils.system_type, ils.gs_type, ils.gs_elevation_10,
-              ils.gs_decLatitude, ils.gs_decLongitude, ils.loc_frequency,
-              ils.ops_status_gs, ils.gs_angle, ils.runway_end_id,
-              ils.ils_identifier, ils.category, ils.approach_bearing, ils.mag_variation
+  $query = "SELECT airport, ICAOcode,  system_type, gs_type, gs_elevation_10,
+              gs_decLatitude, gs_decLongitude, loc_frequency,
+              ops_status_gs, gs_angle, runway_end_id,
+              ils_identifier, category, approach_bearing, mag_variation
             FROM ils
-            LEFT JOIN apt ON ils.airport_site_id = apt.aixm_key
-            WHERE ils.ops_status_gs regexp 'OPERATIONAL'
-            ORDER BY apt.ICAOcode ASC, ils.approach_bearing DESC";
+            WHERE ops_status_gs regexp 'OPERATIONAL'
+            ORDER BY ICAOcode ASC, approach_bearing DESC";
   $r1 = $db->query($query);
   while ($row = $r1->fetch_assoc()) {
     $record_type = 6;
@@ -246,6 +246,7 @@ return($gs);
 /** 
  * function mb_build()
  * Create the "7", "8" and "9"  Marker Beacon records
+ * Use the markerbeacon table
  */
 
 function mb_build(){
@@ -280,16 +281,138 @@ function mb_build(){
     $bearing = sprintf("%7.3f", $bearing);
     $runway = sprintf("%-3s", $row['runway_end_id']);
     $airport = sprintf("%-4s", $row['ICAOcode']);
-
     $unused  = "    0   0    ";
 
-
     $mb .= "$record_type $latitude $longitude $hold_elevation $unused $bearing ---- $airport $runway $marker_type\n";
-
   }
 return ($mb);
 
 }
 
 
- 
+/**
+ * function dme_build()
+ * Create the "12" and "13"  DME records
+ * Use the ils table
+ * Column 1: 12=Suppress Frequency, 13=Display Frequency
+ */
+
+function dme_build(){
+  global $db;
+  $dme = "";
+  $feet_per_nm = 6076.12;
+  $try = $db->query("DELETE FROM dme_tmp");
+
+
+  //  Process 'ils' table
+  $query = "SELECT airport, ICAOcode, system_type, loc_elevation_10,
+              loc_decLatitude, loc_decLongitude, loc_frequency,
+              ops_status_loc, approach_bearing, runway_end_id,
+              ils_identifier, category, dme_bias, mag_variation
+            FROM ils
+            WHERE (system_type = 'ILS/DME' OR system_type = 'LDA/DME' OR system_type='LOC/DME')
+            AND ops_status_loc regexp 'OPERATIONAL'
+            ORDER BY category DESC, ICAOcode ASC, approach_bearing ASC";
+  $r1 = $db->query($query);
+
+  while ($row = $r1->fetch_assoc()) {
+    $navtype = trim($row['system_type']);
+    $record_type=0;
+      if ($navtype=='ILS/DME' or $navtype=='LDA/DME' or $navtype='LOC/DME') {$record_type=12;}
+//    $category = str_replace('IIIB', 'III', $category);
+    $ident = $name = sprintf("%4s", str_replace("-", "", $row['ils_identifier']));
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['loc_decLatitude'])));
+    $airport = sprintf("%-4s", $row['ICAOcode']);
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['loc_decLongitude']));
+    $elevation = sprintf("%6s", (($row['loc_elevation_10'] == '') ? 0 : (intval($row['loc_elevation_10']))));
+    $frequency = intval($row['loc_frequency'] * 100);
+    $mag_variation = intval(substr($row['mag_variation'], 0, -1)) * ((substr($row['mag_variation'], -1) == 'E') ? 1 : -1);
+    $dme_bias = sprintf("%2.3f", ($row['dme_bias'] / $feet_per_nm));
+    $runway = sprintf("%-3s", $row['runway_end_id']);
+    $range = 18;
+
+ //   $dme .= "$record_type $latitude $longitude $elevation $frequency $range $dme_bias $ident $airport $runway $name $navtype\n";
+    $query1 = "INSERT INTO dme_tmp SET 
+                 rowcode='$record_type', 
+                 type='$navtype',
+                 dme_decLatitude='" . $row['loc_decLatitude'] . "', 
+                 dme_decLongitude='" . $row['loc_decLongitude'] . "',
+                 dme_bias='$dme_bias', 
+                 dme_elevation_10='" . $row['loc_elevation_10'] . "',
+                 dme_range='$range', 
+                 ils_identifier='$ident',
+                 frequency='$frequency',
+                 ICAOcode='$airport', 
+                 runway_end_id='$runway', 
+                 dme_name='$name'";
+    $r2 = $db->query($query1);
+  }
+
+
+  //  Process 'nav' table
+  $query = "SELECT id, name, type, class, frequency, power, decLongitude, decLatitude, elevation_10, range_nm from nav
+            WHERE (type = 'TACAN' OR type='VORTAC' OR type='VOR/DME' or type='NDB/DME')
+            AND status regexp 'OPERATIONAL'
+            AND public='Y'
+            ORDER BY name ASC";
+  $r1 = $db->query($query);
+
+  while ($row = $r1->fetch_assoc()) {
+    $navtype = trim($row['type']);
+    $record_type=0;
+      if ($navtype=='VORTAC' or $navtype=='VOR/DME') {$record_type=12;}
+      if ($navtype=='TACAN' or $navtype=='NDB/DME')  {$record_type=13;}
+    $ident     = trim($row['id']);
+    $name      = trim($row['name']);
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['decLatitude'])));
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['decLongitude']));
+    $elevation = sprintf("%6s", (($row['elevation_10'] == '') ? 0 : (intval($row['elevation_10']))));
+    $frequency = intval($row['frequency'] * 100);
+    $range =  trim($row['range_nm']);
+    $dme_bias = "0.0";
+    $display_type = str_replace("/", "-", $navtype) . " DME";
+
+//    $dme .= "$record_type $latitude $longitude $elevation $frequency $range $dme_bias $ident $name $display_type\n";
+    $query1 = "INSERT INTO dme_tmp SET
+                 rowcode='$record_type',
+                 type='$display_type',
+                 dme_decLatitude='" . $row['decLatitude'] . "',
+                 dme_decLongitude='" . $row['decLongitude'] . "',
+                 dme_bias='$dme_bias',
+                 dme_elevation_10='" . $row['elevation_10'] . "',
+                 dme_range='$range',
+                 ils_identifier='$ident',
+                 frequency='$frequency',
+                 ICAOcode='',
+                 runway_end_id='',
+                 dme_name='$name'";
+    $r2 = $db->query($query1);
+  }
+
+// Generate DME records
+  $query = "SELECT rowcode, type, frequency, dme_decLatitude, dme_decLongitude, dme_bias, dme_elevation_10, 
+                   dme_range, ils_identifier, ICAOcode, runway_end_id, dme_name
+            FROM dme_tmp ORDER BY rowcode ASC, ICAOcode ASC";
+  $r1 = $db->query($query);
+  while ($row = $r1->fetch_assoc()) {
+    $record_type = $row['rowcode']; 
+    $system_type = $row['type'];
+    $latitude  = str_replace('+', ' ', sprintf("%11s", sprintf("%+012.8f", $row['dme_decLatitude'])));
+    $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['dme_decLongitude']));
+    $elevation = sprintf("%6s", (($row['dme_elevation_10'] == '') ? 0 : (intval($row['dme_elevation_10']))));
+    $frequency = $row['frequency'];
+    $range     = sprintf("%3s", $row['dme_range']);
+$range = 25;
+    $dme_bias  = sprintf("%11s", sprintf("%6.3f", $row['dme_bias']));
+    $ICAOcode  = $row['ICAOcode'];
+    $runway    = $row['runway_end_id'];
+    $ident     = $row['ils_identifier'];
+    $name      = $row['dme_name'];
+      if ($system_type == 'ILS/DME'){$system_type='DME-ILS';}
+    $dme .= "$record_type $latitude $longitude $elevation $frequency $range $dme_bias $ident $ICAOcode $runway $name $system_type\n";
+  }
+
+
+return($dme);
+} 
+

@@ -28,6 +28,7 @@ CREATE TABLE `ils` (
   `airport_site_id` varchar(11) NOT NULL COMMENT 'AIRPORT SITE NUMBER IDENTIFIER. (EX. 04508.*A)',
   `system_type` varchar(10) DEFAULT NULL COMMENT 'ILS SYSTEM TYPE (ILS, SDF . . . )',
   `ils_identifier` varchar(6) DEFAULT NULL COMMENT 'ILS IDENTIFIER, PREFIXED BY I-',
+  `ICAOcode` varchar(6) DEFAULT NULL COMMENT 'Airport ICAO Code (optional)',
   `airport` varchar(4) DEFAULT NULL COMMENT 'AIRPORT IDENTIFIER',
   `category` varchar(9) DEFAULT NULL COMMENT 'CATEGORY OF THE ILS. (I,II,IIIA)',
   `approach_bearing` varchar(6) DEFAULT NULL COMMENT 'ILS APPROACH BEARING IN DEGREES MAGNETIC',

@@ -121,6 +121,12 @@ function parseIlsFile($file) {
   }
   fclose($fh);
 
+// Add to the ils table
+   $query = "UPDATE ils 
+            INNER JOIN apt ON ils.airport_site_id = apt.aixm_key
+            SET ils.ICAOcode = apt.ICAOcode";
+   $try = $db->query($query);
+
 // Add to markerbeacon table
    $query = "UPDATE markerbeacon
             INNER JOIN apt ON markerbeacon.airport_site_id = apt.aixm_key
@@ -197,6 +203,7 @@ $stringPositions[4] = array(                                      // ILS Record 
     "dme_decLongitude" => array("start" => 99,  "length" => 11),  // LONGITUDE OF DME ANTENNA.(ALL SECONDS)
     "dme_bias"         => array("start" => 112, "length" => 7),   // DISTANCE OF DME TRANSMITTER ANTENNA FROM APPROACH END OF RUNWAY.(FEET)
                                                                   // BIAS MUST BE CONVERTED TO NM
+                                                                  // Ref: https://flightgear-devel.narkive.com/gzJcsGTQ/dme-bias-question
     "dme_elevation_10" => array("start" => 126, "length" => 7),   // ELEVATION OF DME ANTENNA IN TENTH OF A FOOT (MSL)
     "dme_channel"      => array("start" => 133, "length" => 4),   // CHANNEL ON WHICH DISTANCE DATA IS TRANSMITTED (EX:  032X, 038X)
     );
