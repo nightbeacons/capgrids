@@ -350,7 +350,7 @@ function dme_build(){
 
 
   //  Process 'nav' table
-  $query = "SELECT id, name, type, class, frequency, power, decLongitude, decLatitude, elevation_10, range_nm from nav
+  $query = "SELECT id, name, type, class, frequency, power, decLongitude, decLatitude, elevation_10, range_nm, dme_svc_vol from nav
             WHERE (type = 'TACAN' OR type='VORTAC' OR type='VOR/DME' or type='NDB/DME')
             AND status regexp 'OPERATIONAL'
             AND public='Y'
@@ -369,6 +369,8 @@ function dme_build(){
     $elevation = sprintf("%6s", (($row['elevation_10'] == '') ? 0 : (intval($row['elevation_10']))));
     $frequency = intval($row['frequency'] * 100);
     $range =  trim($row['range_nm']);
+    $dme_svc_vol = trim($row['dme_svc_vol']);
+    $power =  trim($row['power']);
     $dme_bias = "0.0";
     $display_type = str_replace("/", "-", $navtype) . " DME";
 
@@ -381,6 +383,8 @@ function dme_build(){
                  dme_bias='$dme_bias',
                  dme_elevation_10='" . $row['elevation_10'] . "',
                  dme_range='$range',
+                 dme_svc_vol='$dme_svc_vol',
+                 power='$power',
                  ils_identifier='$ident',
                  frequency='$frequency',
                  ICAOcode='',
@@ -391,7 +395,7 @@ function dme_build(){
 
 // Generate DME records
   $query = "SELECT rowcode, type, frequency, dme_decLatitude, dme_decLongitude, dme_bias, dme_elevation_10, 
-                   dme_range, ils_identifier, ICAOcode, runway_end_id, dme_name
+                   dme_range, dme_svc_vol, power, ils_identifier, ICAOcode, runway_end_id, dme_name
             FROM dme_tmp ORDER BY rowcode ASC, ICAOcode ASC";
   $r1 = $db->query($query);
   while ($row = $r1->fetch_assoc()) {
@@ -401,9 +405,14 @@ function dme_build(){
     $longitude = str_replace('+', ' ', sprintf("%+013.8f", $row['dme_decLongitude']));
     $elevation = sprintf("%6s", (($row['dme_elevation_10'] == '') ? 0 : (intval($row['dme_elevation_10']))));
     $frequency = $row['frequency'];
-    $range     = sprintf("%3s", $row['dme_range']);
-$range = 25;
-    $dme_bias  = sprintf("%11s", sprintf("%6.3f", $row['dme_bias']));
+      if (trim($row['dme_range'])=='') {
+         $row['dme_range'] = 25;
+      }
+    $range_tmp     = $row['dme_range'];
+       if ($row['dme_svc_vol'] == 'L') {$range_tmp=40;}
+    $range = sprintf("%3s", $range_tmp) . "|" . $row['dme_svc_vol'] . "|" . $row['power'] . "|";
+    $dme_svc_vol = $row['dme_svc_vol'];
+    $dme_bias  = sprintf("%8s", sprintf("%6.3f", $row['dme_bias']));
     $ICAOcode  = $row['ICAOcode'];
     $runway    = $row['runway_end_id'];
     $ident     = $row['ils_identifier'];
