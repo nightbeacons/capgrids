@@ -1,5 +1,9 @@
 #!/usr/bin/php
 <?php
+/**
+ * Read the FAA AIXM data
+ * build the nav.dat file
+ */
 include_once "/var/www/capgrids/pwf/aixm.php";
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
@@ -11,16 +15,29 @@ if (mysqli_connect_errno()) {
 
 
 $output_file = "nav.dat";
+
+// Create the "2" records
 $ndb = ndb_build();
 //echo $ndb;
+
+// Create the "3" records
 $vor = vor_build();
 //echo $vor;
+
+// Create the "4" and "5" records 
 $loc = loc_build();
 //echo $loc;
+
+// Create the "6" records
 $gs = gs_build();
 //echo $gs;
+
+// Create the "7", "8" and "9" records
 $mb = mb_build();
 //echo $mb;
+
+// (The schema does not use "10" or "11" records)
+// Create the "12" and "13" records
 $dme = dme_build();
 echo $dme;
 
