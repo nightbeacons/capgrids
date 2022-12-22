@@ -6,10 +6,12 @@ include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_fix.php";
 include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_nav.php";
 include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_ils.php";
 
+$DEVMODE=FALSE;
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 
 // DB table names are lc versions of filenames
+//  Exception: the db 'rwy' is derived from the APT.txt file
 $files_to_process = array('APT', 'NAV', 'FIX', 'ILS');
 // $files_to_process = array('ILS');
 
@@ -26,14 +28,13 @@ $today = date('Y-m-d');
 // If the "Next Edition Date" is today 
 //  (or in the past)
 // then fetch the new files
-// DEV  if ($today >= $nextDate){
-  if (TRUE) {
+  if (($today >= $nextDate) OR (!file_exists($nextFile)) OR $DEVMODE){
 
     if (mysqli_connect_errno()){
     printf("Connection failed: %s\n", mysqli_connect_error());
     exit();
     }
-// DEV  $result = downloadLatestZipfile($workDir);
+  $result = downloadLatestZipfile($workDir);
 
   foreach($files_to_process as $data_file){
   $file = $workDir . $data_file . ".txt";
@@ -45,6 +46,7 @@ $today = date('Y-m-d');
   switch($data_file){
     case "APT":
       $result = parseAptFile($file);
+      $result = parseAptFileForRwy($file);
       break;
 
     case "NAV":
@@ -60,13 +62,15 @@ $today = date('Y-m-d');
       break;
   }
 
-//  $query = "OPTIMIZE TABLE " . lc($data_file);
-//  $try = $db->query($query);
+  $query = "OPTIMIZE TABLE " . lc($data_file);
+  $try = $db->query($query);
 
   }
-
-// DEV  writeIncludeFile();
-// DEV  writeNextEditionDate($nextFile);
+ 
+  if (!$DEVMODE){
+    writeIncludeFile();
+    writeNextEditionDate($nextFile);
+  }
   mysqli_close($db);
 
   }
