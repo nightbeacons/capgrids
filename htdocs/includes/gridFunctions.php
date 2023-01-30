@@ -390,15 +390,16 @@ $quadrantOffsets = array (
  */
 function magVariation($lat, $lon)
 {
+global $noaa_key;
 $baseUrl = "https://www.ngdc.noaa.gov/geomag-web/calculators/calculateDeclination";
 
 # Use for the variation found on Sectional Charts
 #$dateString = "minYear=2004&minMonth=6&minDay=30";
 
+$api_key = "&key=" . $noaa_key;
 $format = "&resultFormat=xml";                  # Format of calculation results: 'html', 'csv', 'xml', or 'pdf'
 
-$url=$baseUrl . "?lat1=" . trim($lat) .  "&lon1=" . trim($lon) .   $format;
-
+$url=$baseUrl . "?lat1=" . trim($lat) .  "&lon1=" . trim($lon) . $api_key . $format;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
