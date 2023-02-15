@@ -29,7 +29,7 @@ $default_sectional = $sectionalAry['name'];
 <meta name="keywords" 
 	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, Google Earth overlay, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol">
 
-<META NAME="revisit-after" content="15 days">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
 <script type="text/javascript" async src="/js/jquery-1.9.1.js"></script>
 <script language="JavaScript" type="text/javascript">
