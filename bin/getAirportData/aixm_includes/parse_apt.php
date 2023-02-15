@@ -114,6 +114,8 @@ function parseAptFileForRwy($file) {
 
   $query = "DELETE FROM rwy";
   $try = $db->query($query);
+  $try = $db->query("ALTER TABLE rwy DROP INDEX ix_spatial_rwy_base_coord");
+  $try = $db->query("ALTER TABLE rwy DROP INDEX ix_spatial_rwy_recip_coord");
 
   $fh = fopen($file, "r");
   if ($fh) {
@@ -144,7 +146,10 @@ function parseAptFileForRwy($file) {
         echo $runwayData['aixm_key'] . "\t" . $runwayData['runway_idents'] . "\n";
       }  // End of 'if (substr($line, 0, 3) == "RWY") '
     }
-
+   $try = $db->query("UPDATE rwy set base_end_coordinates=Point(base_end_dec_lon, base_end_dec_lat)");
+   $try = $db->query("create spatial index ix_spatial_rwy_base_coord ON rwy(base_end_coordinates)");
+   $try = $db->query("UPDATE rwy set recip_end_coordinates=Point(recip_end_dec_lon, recip_end_dec_lat)");
+   $try = $db->query("create spatial index ix_spatial_rwy_recip_coord ON rwy(recip_end_coordinates)");
   }
 }
 

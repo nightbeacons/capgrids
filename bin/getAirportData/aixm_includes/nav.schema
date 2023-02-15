@@ -31,7 +31,7 @@ CREATE TABLE `nav` (
   `class` varchar(11) NOT NULL COMMENT 'Class of Navaid',
   `frequency` varchar(6) NOT NULL,
   `power` varchar(4) DEFAULT NULL COMMENT 'Power output, in watts',
-  `range_nm` int(3) DEFAULT NULL COMMENT 'Range, in NM',
+  `range_nm` varchar(4) DEFAULT NULL COMMENT 'Range, in NM',
   `voice_call` varchar(30) DEFAULT NULL COMMENT 'Radio Voice Call',
   `city` varchar(40) DEFAULT NULL,
   `state` varchar(30) DEFAULT NULL,

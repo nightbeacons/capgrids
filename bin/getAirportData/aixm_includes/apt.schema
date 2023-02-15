@@ -25,33 +25,27 @@ DROP TABLE IF EXISTS `apt`;
 CREATE TABLE `apt` (
   `aixm_key` varchar(11) NOT NULL COMMENT 'AIXM Airport Identifier',
   `name` varchar(50) NOT NULL COMMENT 'Airport Name',
+  `aptType` varchar(13) DEFAULT NULL,
   `ICAOcode` varchar(6) DEFAULT NULL COMMENT 'Airport ICAO Code (optional)',
   `aptCode` varchar(6) NOT NULL COMMENT 'Airport Code',
   `city` varchar(40) NOT NULL,
   `stateAbbrev` varchar(2) NOT NULL,
   `sectional` varchar(30) NOT NULL,
   `sectionalAbbrev` varchar(4) NOT NULL,
+  `elevation` float NOT NULL DEFAULT '0' COMMENT 'Elevation in feet',
   `latitude` varchar(15) NOT NULL,
   `N_S` varchar(1) NOT NULL DEFAULT 'N',
   `decLatitude` double NOT NULL,
   `longitude` varchar(15) NOT NULL,
   `E_W` varchar(1) NOT NULL DEFAULT 'W',
   `decLongitude` double NOT NULL,
+  `magvar` varchar(3) DEFAULT NULL COMMENT 'Magnetic Variation (15W)',
   `coordinates` point NOT NULL,
   UNIQUE KEY `aptCode` (`aptCode`,`ICAOcode`),
-  SPATIAL KEY `ix_spatial_apt_data_coord` (`coordinates`),
-  KEY `AIXM_KEY` (`aixm_key`)
+  KEY `AIXM_KEY` (`aixm_key`),
+  SPATIAL KEY `ix_spatial_apt_data_coord` (`coordinates`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `apt`
---
-
-LOCK TABLES `apt` WRITE;
-/*!40000 ALTER TABLE `apt` DISABLE KEYS */;
-/*!40000 ALTER TABLE `apt` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -62,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-10-17 18:39:18
+-- Dump completed on 2022-12-22  1:49:26
