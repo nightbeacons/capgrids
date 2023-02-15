@@ -8,6 +8,7 @@ $workDir = "/tmp/aixm/";
    if (!is_dir($workDir)){
    mkdir($workDir);
    }
+$file = $workDir . "APT.txt";
 
 $nextFile = $workDir . "nextEdition.txt";
 $nextDate = file_get_contents($nextFile);
@@ -16,13 +17,12 @@ $today = date('Y-m-d');
 // If the "Next Edition Date" is today 
 //  (or in the past)
 // then fetch the new files
-  if ($today >= $nextDate){
-
+  if (($today >= $nextDate) OR (!file_exists($file))){
+// if (TRUE){
     if (mysqli_connect_errno()){
     printf("Connection failed: %s\n", mysqli_connect_error());
     exit();
     }
-  $file = $workDir . "APT.txt";
   $result = downloadLatestZipfile($workDir);
 
      if (!file_exists($file)){

@@ -31,7 +31,9 @@ if (mysqli_connect_errno()) {
 }
 
 $curdir = getcwd();
+//$input_file = $curdir . "/apt_test.dat";
 $input_file = $curdir . "/apt.dat";
+
 $output_file = $curdir . "/new_apt.dat";
 $in_airport_record = FALSE;
 
@@ -40,6 +42,7 @@ $fpw = fopen($output_file, 'w');
 
 // Step through the x-plane apt.dat file, checking for
 // airport records (case '1') and Land runway records (case '100')
+$line_number = 0;
 while (($line = fgets($fpr, 4096)) !== FALSE) {
   $type = ltrim(substr($line, 0, 4));
   if (strlen(trim($line)) < 2) {
@@ -90,7 +93,7 @@ function processRunwayRecord($xp_runway_record) {
   global $in_airport_record, $DEBUG;
 
   $line = $xp_runway_record;
-  $msg = "";
+  $msg = $status_msg = "";
   if (trim(substr($xp_runway_record, 31, 1)) != "H") {
     $xp_base_runway_num = trim(substr($xp_runway_record, 31, 3));
     $xp_base_lrc_tag = trim(preg_replace('/[0-9]+/', '', trim($xp_base_runway_num)));
@@ -110,21 +113,28 @@ function processRunwayRecord($xp_runway_record) {
         $msg .= "Base RWY corresponds\n";
       }
       else {
-        $msg .= "Base RWY needs update\n";
-        $line = substr_replace($line, str_pad($nearest_base['base_end_ident'], 3, " "), 31, 3);
+        if (!ctype_alpha(trim($nearest_base['base_end_ident']))) {
+          $msg .= "Base RWY needs update\n";
+          $line = substr_replace($line, str_pad(ltrim($nearest_base['base_end_ident'], '0 '), 3, " "), 31, 3);
+          $status_msg .= "   Changing " . $nearest_base['apt_code'] . " runway " . $xp_base_runway_num . " to " . ltrim($nearest_base['base_end_ident'], '0 ') . "\n";
+        }
       }
+
       if ($xp_recip_runway_num == $nearest_base['recip_end_ident']) {
         $msg .= "Recip RWY correspond\n";
       }
       else {
-        $msg .= "Recip RWY needs update\n";
-        $line = substr_replace($line, str_pad($nearest_base['recip_end_ident'], 3, " "), 87, 3);
-
+        if (!ctype_alpha(trim($nearest_base['recip_end_ident']))) {
+          $msg .= "Recip RWY needs update\n";
+          $line = substr_replace($line, str_pad(ltrim($nearest_base['recip_end_ident'], '0 '), 3, " "), 87, 3);
+          $status_msg .= "   Changing " . $nearest_base['apt_code'] . " runway " . $xp_recip_runway_num . " to " . ltrim($nearest_base['recip_end_ident'], '0 ') . "\n\n";
+        }
       }
       if ($DEBUG) {
         echo $msg . "$xp_runway_record\n$line\n\n\n";
       }
     }
+    echo $status_msg;
   }
   return($line);
 }
@@ -185,7 +195,7 @@ function findNearestRwy($lat, $lon, $endspec) {
            FROM rwy
            LEFT JOIN apt on rwy.aixm_key=apt.aixm_key
            WHERE (aptCode IS NOT NULL) AND (aptCode != '') AND (SUBSTRING(runway_idents, 1 ,1) != 'H') 
-          HAVING (distance < 0.1)
+          HAVING (distance < 0.003)
           ORDER BY distance ASC LIMIT 1";
 
   $r1 = $db->query($query);
@@ -198,12 +208,15 @@ function findNearestRwy($lat, $lon, $endspec) {
     $runway['base_end_ident']  = trim($row['base_end_ident']);
     $runway['recip_end_ident'] = trim($row['recip_end_ident']);
     $runway['ident']           = $row[$col1];
+    $runway['distance']        = $row['distance'];
   }
   if ($runway['ident'] == "NOT FOUND") {
     $runway['endspec'] = "NOT FOUND";
   }
   if ($runway['apt_code'] != "NOT FOUND") {
     echo "Processing runways for " . $runway['apt_code'] . "\n";
+   if ($DEBUG) {echo "Distance is " . $runway['distance'] . "\n";
+     }
   }
   if ($DEBUG) {
     print_r($runway);
