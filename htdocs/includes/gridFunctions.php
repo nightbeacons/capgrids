@@ -33,7 +33,7 @@ $mapType = array(
 #		- Format (optional)
 #			dmm = Degrees plus decimal minutes (default)
 #			dms = Degree Minutes Seconds 
-#
+#                       raw = Decimal degrees (float) -- not used for grid2lonlat
 #
 
 function grid2lonlat($sectional, $gridNum, $quadrant="E", $format="dmm")
@@ -750,7 +750,6 @@ $timeZoneName = $tzInfo->timeZoneName;
 $tz_pattern = '/(?<=\s|^)[a-z]/i';
 preg_match_all($tz_pattern, $timeZoneName, $matches);
 $timeZoneAbbrev = strtoupper(implode('', $matches[0]));
-
 
 $twilight['sunrise_GMT']     = date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, 0);
 $twilight['sunrise_Local']   = date_sunrise(time(), SUNFUNCS_RET_STRING, $lat, $lon, $zenith, $gmtOffset);
