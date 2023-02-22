@@ -264,6 +264,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', e
 
 p.sectionalUpdateHead {
   font-weight: 500;
+  font-style: italic;
   margin-bottom: 0;
 }
 

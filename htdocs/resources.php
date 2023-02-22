@@ -73,7 +73,8 @@ $sectionalName=ucwords(strtolower(preg_replace("/_/"," ", $sectional)));
 <head>
 <meta charset="utf-8" />
 
-<script src="js/jquery-1.9.1.js"></script>
+<XXscript rc="js/jquery-1.9.1.js"></XXscript>
+<script src="js/jquery.js"></script>
 <script src="js/jquery-ui.js"></script>
 <script>
 

@@ -355,7 +355,7 @@ function writeLatestSectionalIncludeFile($db, $latestSectionalFile) {
 
   while ($myrow = $r1->fetch_array(MYSQLI_ASSOC)) {
     if ($count == 0) {
-      fwrite($fh, "<p class=\"sectionalUpdateHead\">Sectionals last updated " . $myrow['editionDate'] . "</p>\n");
+      fwrite($fh, "<p class=\"sectionalUpdateHead\">Sectionals updated " . $myrow['editionDate'] . "</p>\n");
 //      fwrite($fh, "<ul>\n");
     }
 //    fwrite($fh, "<li class=\"sectionalUpdateRow\"><a class=\"sectionalUpdateLink\" href=\"/overlays/" . $myrow['Abbrev'] . "_grid.kmz\">" . $myrow['FullName'] . "</a>  " . $myrow['editionNumber'] . "</li>\n");
