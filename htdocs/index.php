@@ -25,9 +25,9 @@ $default_sectional = $sectionalAry['name'];
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
 <meta name="description" 
-	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams. The Swiss Army Knife of Search Grids, it can calculate grid corners and grid identifiers for any US Sectional chart. It also provides adjustable maps, and large map printouts."">
+	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams. The Swiss Army Knife of Search Grids, it calculates grid corners and grid identifiers for any US Sectional chart. It also provides adjustable maps, downloadable gridded sectionals, Google Earth overlays with current sectionals, and large map printouts.">
 <meta name="keywords" 
-	content="CAP grid, SAR grid, gridmaster, search grids, search and rescue grids, Google Earth overlay, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol">
+	content="CAP grid, SAR grid, gridded sectional, search grids, search and rescue grids, Google Earth overlay, G1000 Flight Plan, G695 Flight Plan, FPL, Civil Air Patrol">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
