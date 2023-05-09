@@ -62,7 +62,7 @@ $today = date('Y-m-d');
       break;
   }
 
-  $query = "OPTIMIZE TABLE " . lc($data_file);
+  $query = "OPTIMIZE TABLE " . strtolower($data_file);
   $try = $db->query($query);
 
   }
