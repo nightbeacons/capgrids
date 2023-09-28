@@ -108,7 +108,7 @@ $fh = fopen($file, "r");
 function downloadLatestZipfile($workDir){
 //$landingPageUrl="https://nfdc.faa.gov/xwiki/bin/view/NFDC/28+Day+NASR+Subscription";
 //$landingPageUrl="https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/";
-$apiUrl = "https://soa.smext.faa.gov/apra/nfdc/nasr/chart?edition=current";
+$apiUrl = "https://external-api.faa.gov/apra/nfdc/nasr/chart?edition=current";
 echo "Fetching data . . . \n";
 
 $zipFileName = "aixmData.zip";

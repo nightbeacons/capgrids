@@ -68,7 +68,8 @@ if ($currentKMLfile != "") {
 function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
   global $user_agent, $FAA_url, $scrape_ary, $db;
   $geoname_No_Spaces = str_replace(" ", "_", $geoname);
-  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
+//  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
+  $url = "https://external-api.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
   $headers = ['Accept: application/json'];
   echo "Fetching $geoname from $url\n";
   // Get JSON for path to the downlad.
@@ -249,10 +250,12 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
       }
     }
 
-    // Remove ZIP, TIFF and TFW files.
-    $cmd1 = "/bin/rm " . $dirname . "/*.tif && /bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";
+    // Remove ZIP and TFW files.
+//    $cmd1 = "/bin/rm " . $dirname . "/*.tif && /bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";
+    $cmd1 = "/bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";
+
     if (DEBUG == 1) {
-      echo "Removing ZIP, TIFF and TFW files\n $cmd1\n\n";
+      echo "Removing ZIP and TFW files\n $cmd1\n\n";
     }
     $tmp = `$cmd1`;
 
@@ -292,7 +295,9 @@ function XXXgetNextEditionDate($geoname) {
   global $user_agent;
 
   $faa_next_date = "";
-  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
+//  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
+  $url = "https://external-api.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
+
   $headers = ['Accept: application/json'];
   $ch = curl_init();
   curl_setopt_array($ch, setCurlOpts());
