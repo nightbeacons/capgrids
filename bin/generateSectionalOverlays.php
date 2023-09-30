@@ -10,7 +10,7 @@
  * Detecting all-white pngs -- see http://www.imagemagick.org/discourse-server/viewtopic.php?t=30614
  */
 
-define('DEBUG', 1);
+define('DEBUG', 0);
 
 // Set to 1 to refresh all chart data, regardless of Edition number or date.
 define('FETCH_ALL', 0);
@@ -22,6 +22,7 @@ $scrape_ary = [];
 // include_once "/var/www/capgrids/includes/coordinates2.php";.
 //include_once "/var/www/capgrids/pwf/apt_dev.php";
 include_once "/var/www/capgrids/pwf/apt.php";
+include_once "/var/www/capgrids/bin/generateGriddedSectionals_inc.php";
 
 $baseDir = "/var/www/capgrids/htdocs/overlays/";
 $latestSectionalFile = "/var/www/capgrids/htdocs/includes/latestSectionals.php";
@@ -128,7 +129,7 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
     //        $cmd1 = "/bin/rm " . $dirname . "/*.htm";
     //        $tmp = `$cmd1`;
     // Download the zipfile.
-    $zipfile_url = trim($info->edition[0]->product->url);
+    $zipfile_url = str_replace(' ', '_',  trim($info->edition[0]->product->url));
     if (DEBUG == 1) {
       echo "Downloading the zipfile from $zipfile_url\n";
     }
@@ -266,6 +267,9 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
     optimizePngFiles($dirname);
 
     // End of "if ($faa_edition != $my_edition)".
+    // GENERATE GRIDDED SECTIONAL
+    buildGriddedPng($geoname);    
+
   }
   else {
     echo "Skipping $geoname -- we have latest version: Ours = $my_current_edition_date and expires = $my_next_edition_date\n";
