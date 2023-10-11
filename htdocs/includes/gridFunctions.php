@@ -221,7 +221,8 @@ $found=0;
 	$found = 0;
 	reset($coordinates);
 	$dataset=$coordinates[$currSectional];
-	
+
+        $sectional_abbreviation=$dataset['Abbrev'];	
 	$latCounter = $dataset['MaxLat'];
 	$lonCounter = $dataset['MaxLon'];
 	$gridCounter = $dataset['startGrid'];
@@ -255,6 +256,7 @@ $found=0;
 		if ($found) {
 		$result = array (
 		 	"sectional"	=> $currSectional,
+                        "abbreviation"  => $sectional_abbreviation,
 	 		"grid" 		=> $gridCounter,
 	 		"quadrant"	=> $quadrant
 		);
@@ -264,6 +266,7 @@ $found=0;
 	if (! $found) {
         $result = array (
                  "sectional"     => "None",
+                 "abbreviation"  => "",
                  "grid"          => "",
                  "quadrant"      => ""
          );

@@ -20,30 +20,29 @@ $FAA_url = "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products
 $scrape_ary = [];
 
 // include_once "/var/www/capgrids/includes/coordinates2.php";.
-//include_once "/var/www/capgrids/pwf/apt_dev.php";
+// include_once "/var/www/capgrids/pwf/apt_dev.php";.
 include_once "/var/www/capgrids/pwf/apt.php";
 include_once "/var/www/capgrids/bin/generateGriddedSectionals_inc.php";
 
 $baseDir = "/var/www/capgrids/htdocs/overlays/";
 $latestSectionalFile = "/var/www/capgrids/htdocs/includes/latestSectionals.php";
 $user_agent = "Civil Air Patrol - CAPgrids (+https://www.capgrids.com)";
-// $user_agent = " - ";
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 if (mysqli_connect_errno()) {
   printf("Connection failed: %s\n", mysqli_connect_error());
   exit();
 }
 
-// $query = "SELECT FullName, editionDate, editionNumber, nextDate from coordinates WHERE FullName != \"None\"";
 $query = "SELECT FullName, editionDate, editionNumber, nextDate from coordinates WHERE FullName != \"None\" AND nextDate <= now()";
-if (FETCH_ALL == 1){
-   $query = "SELECT FullName, editionDate, editionNumber, nextDate from coordinates WHERE FullName != \"None\"";
+if (FETCH_ALL == 1) {
+  $query = "SELECT FullName, editionDate, editionNumber, nextDate from coordinates WHERE FullName != \"None\"";
 }
 
 
 $r1 = $db->query($query);
 
 $currentKMLfile = "";
+// Main Loop.
 while ($myrow = $r1->fetch_array(MYSQLI_ASSOC)) {
   $currentKMLfile = getTiff($myrow['FullName'], $baseDir, $myrow['editionDate'], $myrow['nextDate']);
 }
@@ -51,16 +50,12 @@ if ($currentKMLfile != "") {
   writeLatestSectionalIncludeFile($db, $latestSectionalFile);
 }
 
-// Foreach ($coordinates as $grid => $value) {
-//  if ($coordinates[$grid]['FullName'] != "None") {
-//    $currentKMLfile = getTiff($coordinates[$grid]['FullName'], $baseDir);
-//  }
-// }.
-
 /**
  * Function getTiff($geoname, $baseDir)
  *   Per https://app.swaggerhub.com/apis/FAA/APRA/1.2.0#/Sectional%20Charts/getSectionalChart
- *   For each sectional in the coordinates.php file:
+ *   For each sectional in the coordinates db:
+ *     - Check the downloaded .htm file for the date of the next edition.
+ *         If that date greater than today's date, skip everything else
  *     - Get information about the sectional, including Edition #, date, and download link
  *     - Fetch the Geo-referenced Tiff file (in ZIP format), write it to basedir/geoname and unzip
  *     - Run gdal_translate to create KML superoverlay (KML + images in JPG format)
@@ -68,70 +63,40 @@ if ($currentKMLfile != "") {
  */
 function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
   global $user_agent, $FAA_url, $scrape_ary, $db;
+  $kml_relative = "";
   $geoname_No_Spaces = str_replace(" ", "_", $geoname);
-//  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
-  $url = "https://external-api.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=current&format=tiff";
-  $headers = ['Accept: application/json'];
-  echo "Fetching $geoname from $url\n";
-  // Get JSON for path to the downlad.
-  $ch = curl_init();
-  curl_setopt_array($ch, setCurlOpts());
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-  $json = curl_exec($ch);
-  $curlError = trim(curl_error($ch));
-  curl_close($ch);
 
-  if (strlen($curlError) > 1) {
-    echo "CURL Error: $curlError fetching $url\n\n";
-  }
-
-  $info = json_decode($json);
-  if (DEBUG == 1) {
-    $returned_json = print_r($info, TRUE);
-    echo "JSON received from $url is \n$json\an and decoded is $returned_json\n\n";
-  }
-
-  // If (isset($info->status->code)) {
-  //    if ($info->status->code == "200") {.
-  $zipfilename = $baseDir . $geoname_No_Spaces . "/" . $geoname_No_Spaces . ".zip";
-  $dirname = dirname($zipfilename);
-  if (DEBUG == 1) {
-    echo "zipfilename = $zipfilename\n\n";
-  }
+  $dirname = $baseDir . $geoname_No_Spaces . "/";
   if (!is_dir($dirname)) {
     mkdir($dirname, 0755, TRUE);
   }
 
-  // DEPRECATED: Check the edition number of the current .htm filename to see if we already have the latest edition.
-  // Check the current edition date from the downloaded .htm file to see if we've got the current verions. (Do not use API)
-  $dateAry                                 = parseHtmFileForDates($dirname);
+  // Check the current edition date from the downloaded .info file to see if we've got the current verions. (Do not use API)
+  // Get the new Current and Next dates from the downloaded .info file.
+  // (The .info file is a copy of the downloaded .htm file, which is copied from the .htm  after each chart has completed processing)
+  $dateAry                                 = parseInfoFileForDates($dirname);
   $my_current_edition_date_original_format = $dateAry['my_current_edition_date_original_format'];
   $my_current_edition_date                 = $dateAry['my_current_edition_date'];
+  $my_next_edition_date_original_format    = $dateAry['my_next_edition_date_original_format'];
   $my_next_edition_date                    = $dateAry['my_next_edition_date'];
 
-  // $faa_edition = $info->edition[0]->editionNumber + 0;
-  // Date is formatted as mm/dd/YYYY. Use faaDate2SQLdate to format as ISO date.
-  //      $faa_edition_date = faaDate2SQLdate($info->edition[0]->editionDate);
-  // If our edition does not match the FAA edition, (or if FETCH_ALL is set) get the FAA edition.
-  if (DEBUG == 1) {
-    // Echo "FAA edition date is $faa_edition_date\n";.
-    echo "Our $geoname chart expires on $my_next_edition_date\n";
-  }
+  $today_no_spaces = date("Ymd") + 0;
 
-  // If (($faa_edition != $my_edition) or (FETCH_ALL == 1)) {.
-  if ((strtotime($my_next_edition_date) <= strtotime("now")) or (FETCH_ALL == 1)) {
-    if (DEBUG == 1) {
-      echo "FAA chart is newer than ours\n   FAA = $my_next_edition_date\n\n";
-    }
+  // If we already have the current edition, skip everything else.
+  if ($today_no_spaces >= $my_next_edition_date_original_format) {
 
-    // Remove the older .htm files
-    //        $cmd1 = "/bin/rm " . $dirname . "/*.htm";
-    //        $tmp = `$cmd1`;
+    // Remove any older .htm files before downloading the new zip.
+    $cmd1 = "/bin/rm " . $dirname . "*.htm";
+    $tmp = `$cmd1`;
+
+    $zipAry      = getZipFileUrl($geoname, $dateAry);
+    $faa_edition = $zipAry['edition'];
+    $zipfile_url = $zipAry['zipUrl'];
+    $zipfilename = $dirname . $geoname_No_Spaces . ".zip";
+
     // Download the zipfile.
-    $zipfile_url = str_replace(' ', '_',  trim($info->edition[0]->product->url));
-    if (DEBUG == 1) {
-      echo "Downloading the zipfile from $zipfile_url\n";
+    if (DEBUG) {
+      echo "Downloading the zipfile from $zipfile_url and writing to $zipfilename\n";
     }
     $fh = fopen($zipfilename, 'w');
     $ch = curl_init();
@@ -180,18 +145,18 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
     // Unzip the file.
     $zip = new ZipArchive();
     $zip->open($zipfilename);
-    if (DEBUG == 1) {
+    if (DEBUG) {
       echo "Unzipping $zipfilename to $dirname . . . \n";
     }
     for ($i = 0; $i < $zip->numFiles; $i++) {
       $filename = $zip->getNameIndex($i);
       $parts = pathinfo($filename);
-      if (DEBUG == 1) {
+      if (DEBUG) {
         echo "Checking for tif extension . . . \n";
       }
       if (($parts['extension'] == 'tif') and (strpos($parts['filename'], $geoname) !== FALSE)) {
-        $tiffFilename = $dirname . "/" . $filename;
-        if (DEBUG == 1) {
+        $tiffFilename = $dirname . $filename;
+        if (DEBUG) {
           echo "TIF filename is $tiffFilename\n";
         }
       }
@@ -199,15 +164,9 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
     $zip->extractTo($dirname);
     $zip->close();
 
-    // Get the new Current and Next dates from the downloaded .htm file.
-    $dateAry                                 = parseHtmFileForDates($dirname);
-    $my_current_edition_date_original_format = $dateAry['my_current_edition_date_original_format'];
-    $my_current_edition_date                 = $dateAry['my_current_edition_date'];
-    $my_next_edition_date                    = $dateAry['my_next_edition_date'];
-
     // Run gdal_translate to create the KML.
     if (file_exists($tiffFilename)) {
-      $kml = $dirname . "/" . $geoname_No_Spaces . ".kml";
+      $kml = $dirname . $geoname_No_Spaces . ".kml";
       // Use JPEG for all except Hawaiian Islands.
       $output_format = "jpeg";
       if ($geoname_No_Spaces == "Hawaiian_Islands") {
@@ -235,12 +194,51 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
 
       file_put_contents($kml, $kml_contents);
 
+      // Remove ZIP and TFW files.
+      //    $cmd1 = "/bin/rm " . $dirname . "/*.tif && /bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";.
+      $cmd1 = "/bin/rm " . $dirname . "*.tfw && /bin/rm " . $dirname . "*.zip";
+
+      if (DEBUG == 1) {
+        echo "Removing ZIP and TFW files\n $cmd1\n\n";
+      }
+      $tmp = `$cmd1`;
+
+      // Optimize the JPGs in and below $dirname.
+      optimizeJpgFiles($dirname);
+
+      // Make transparent, then Optimize/Compress PNG files in and below $dirname.
+      optimizePngFiles($dirname);
+
+      // End of "if ($faa_edition != $my_edition)".
+      // GENERATE GRIDDED SECTIONAL.
+      buildGriddedPng($geoname);
+
+      // End of "if ($info->status->code == "200")".
+      //    }
+      // End of   "if (isset($info->status->code))".
+      //  }
+      // Return relative path to the generated KML file
+      //  such as Baltimore.kml.
+      $kml_relative = $geoname_No_Spaces . ".kml";
+      if (DEBUG == 1) {
+        echo "KML Relative Path is $kml_relative\n";
+      }
+
+      // Update the .info file.
+      if (DEBUG) {
+        echo "Updating " . $dateAry['info_file'] . " from " . $dateAry['htm_file'] . "\n";
+      }
+      copy($dateAry['htm_file'], $dateAry['info_file']);
+
       // Get the date of the next edition.
-      //   $nextDate = getNextEditionDate($geoname);
+      $dateAry                 = parseInfoFileForDates($dirname);
+      $my_next_edition_date    = $dateAry['my_next_edition_date'];
+      $my_current_edition_date = $dateAry['my_current_edition_date'];
+
+      // $nextDate = getNextEditionDate($geoname);
       $nextDate = $my_next_edition_date;
       // Update MySQL tables.
-      $faa_edition = 0;
-      $query = "UPDATE coordinates SET editionNumber='" . $faa_edition . "', editionDate='" . $my_current_edition_date . "', nextDate='" . $nextDate . "'  WHERE FullName='" . $geoname . "' LIMIT 1";
+      $query = "UPDATE coordinates SET editionNumber='" . $faa_edition . "', editionDate='" . $my_current_edition_date . "', nextDate='" . $my_next_edition_date . "'  WHERE FullName='" . $geoname . "' LIMIT 1";
 
       echo "Running query $query\n";
 
@@ -249,41 +247,11 @@ function getTiff($geoname, $baseDir, $editionDate, $nextDate) {
         echo "\nquery failed: (" . $db->errno . ") " . $db->error;
         echo "\nQuery = $query\n";
       }
-    }
 
-    // Remove ZIP and TFW files.
-//    $cmd1 = "/bin/rm " . $dirname . "/*.tif && /bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";
-    $cmd1 = "/bin/rm " . $dirname . "/*.tfw && /bin/rm " . $dirname . "/*.zip";
-
-    if (DEBUG == 1) {
-      echo "Removing ZIP and TFW files\n $cmd1\n\n";
-    }
-    $tmp = `$cmd1`;
-
-    // Optimize the JPGs in and below $dirname.
-    optimizeJpgFiles($dirname);
-
-    // Make transparent, then Optimize/Compress PNG files in and below $dirname.
-    optimizePngFiles($dirname);
-
-    // End of "if ($faa_edition != $my_edition)".
-    // GENERATE GRIDDED SECTIONAL
-    buildGriddedPng($geoname);    
-
+    }    // End of "if (file_exists($tiffFilename))"
   }
   else {
     echo "Skipping $geoname -- we have latest version: Ours = $my_current_edition_date and expires = $my_next_edition_date\n";
-  }
-
-  // End of "if ($info->status->code == "200")".
-  //    }
-  // End of   "if (isset($info->status->code))".
-  //  }
-  // Return relative path to the generated KML file
-  //  such as Baltimore.kml.
-  $kml_relative = $geoname_No_Spaces . ".kml";
-  if (DEBUG == 1) {
-    echo "KML Relative Path is $kml_relative\n";
   }
   return($kml_relative);
 }
@@ -299,7 +267,7 @@ function XXXgetNextEditionDate($geoname) {
   global $user_agent;
 
   $faa_next_date = "";
-//  $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
+  // $url = "https://soa.smext.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
   $url = "https://external-api.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=next&format=tiff";
 
   $headers = ['Accept: application/json'];
@@ -320,7 +288,7 @@ function XXXgetNextEditionDate($geoname) {
       $faa_next_date = faaDate2SQLdate($info->edition[0]->editionDate);
     }
   }
-  if (DEBUG == 1) {
+  if (DEBUG) {
     echo "Next FAA edition for $geoname is $faa_next_date\n";
   }
   return($faa_next_date);
@@ -348,7 +316,7 @@ function faaDate2SQLdate($faa_date) {
  * just updated.
  */
 function writeLatestSectionalIncludeFile($db, $latestSectionalFile) {
-  if (DEBUG == 1) {
+  if (DEBUG) {
     echo "Writing to Include file at $latestSectionalFile\n";
   }
   $fh = fopen($latestSectionalFile, "w");
@@ -365,12 +333,12 @@ function writeLatestSectionalIncludeFile($db, $latestSectionalFile) {
   while ($myrow = $r1->fetch_array(MYSQLI_ASSOC)) {
     if ($count == 0) {
       fwrite($fh, "<p class=\"sectionalUpdateHead\">Sectionals updated " . $myrow['editionDate'] . "</p>\n");
-//      fwrite($fh, "<ul>\n");
+      // fwrite($fh, "<ul>\n");.
     }
-//    fwrite($fh, "<li class=\"sectionalUpdateRow\"><a class=\"sectionalUpdateLink\" href=\"/overlays/" . $myrow['Abbrev'] . "_grid.kmz\">" . $myrow['FullName'] . "</a>  " . $myrow['editionNumber'] . "</li>\n");
+    // fwrite($fh, "<li class=\"sectionalUpdateRow\"><a class=\"sectionalUpdateLink\" href=\"/overlays/" . $myrow['Abbrev'] . "_grid.kmz\">" . $myrow['FullName'] . "</a>  " . $myrow['editionNumber'] . "</li>\n");.
     $count++;
   }
-//  fwrite($fh, "</ul>\n");
+  // fwrite($fh, "</ul>\n");.
   fclose($fh);
 
 }
@@ -400,7 +368,7 @@ function scrape_faa_page($FAA_url, $sectional_key = "sectional-files") {
 
   if ((strlen($curlError) > 1) or ($curlStatus['http_code'] == '404')) {
     $page .= "CURL Error: $curlError fetching $url\nStatus: " . $curlStatus['http_code'] . "\n";
-    if (DEBUG == 1) {
+    if (DEBUG) {
       echo $page;
     }
   }
@@ -419,32 +387,119 @@ function scrape_faa_page($FAA_url, $sectional_key = "sectional-files") {
 }
 
 /**
- * ParseHtmFileForDates($dirname)
- *  Scan the directory for a .htm file
+ * ParseInfoFileForDates($dirname)
+ *  Scan the directory for a .info file
  *  Parse the file for the meta-data:
  *    dc.coverage.t.min (date of current edition)
  *    dc.coverage.t.max (date of next edition)
  *  which are in the form YYYYmmdd.
  *
+ *  The .info file is a copy of the existing .htm file, before the
+ *  new zipfile is downloaded and unzipped (and overwriting the .htm)
+ *    The zipfile is downloaded and unzipped before any chart processing happens.
+ *  The .info file is copied from the .html as the final step in chart processing.
+ *  If the script is interrupted or aborted before the processing is complete,
+ *  the .info file will contain the correct data.
+ *
  *  Return as an assoc. array
- *  If .htm is not found, return zeroes in the array.
+ *  If .info is not found, return zeroes in the array.
  */
-function parseHtmFileForDates($dirname) {
+function parseInfoFileForDates($dirname) {
   $dateAry['my_current_edition_date'] = $dateAry['my_next_edition_date'] = $dateAry['my_current_edition_date_original_format'] = 0;
   $dh = opendir($dirname);
   $files = [];
   while (($file = readdir($dh)) !== FALSE) {
     if (substr($file, strlen($file) - 4) == '.htm') {
-      $html_file = file_get_contents($dirname . "/" . $file);
-      if ($html_file !== FALSE) {
-        $dateAry['my_current_edition_date_original_format'] = trim(preg_replace("/.*?<meta name=\"dc.coverage.t.min\" content=\"(\d+).*/s", '$1', $html_file));
+      $info_filename = str_replace('.htm', '.info', $file);
+      if (!file_exists($dirname . $info_filename)) {
+        if (DEBUG) {
+          echo "Info file " . $dirname . $info_filename . " does not exist.\nCopying from " . $dirname . $file . " to create it.\n";
+        }
+        copy($dirname . $file, $dirname . $info_filename);
+      }
+      $info_file = file_get_contents($dirname . $info_filename);
+      if ($info_file !== FALSE) {
+        $dateAry['my_current_edition_date_original_format'] = trim(preg_replace("/.*?<meta name=\"dc.coverage.t.min\" content=\"(\d+).*/s", '$1', $info_file)) + 0;
         $dateAry['my_current_edition_date']                 = faaDate2SQLdate($dateAry['my_current_edition_date_original_format']);
-        $dateAry['my_next_edition_date']                    = faaDate2SQLdate(trim(preg_replace("/.*?<meta name=\"dc.coverage.t.max\" content=\"(\d+).*/s", '$1', $html_file)));
+        $dateAry['my_next_edition_date_original_format']    = trim(preg_replace("/.*?<meta name=\"dc.coverage.t.max\" content=\"(\d+).*/s", '$1', $info_file)) + 0;
+        $dateAry['my_next_edition_date']                    = faaDate2SQLdate($dateAry['my_next_edition_date_original_format']);
+        $dateAry['info_file']                               = $dirname . $info_filename;
+        $dateAry['htm_file']                                = $dirname . $file;
       }
     }
   }
   closedir($dh);
   return($dateAry);
+}
+
+/**
+ * GetZipFileUrl($geoname, $dateAry)
+ * If we are here, we know that the "Next Edition" date
+ *   is less than or equal to the current date.
+ * (That is, the chart has expired and a new one is available)
+ * Fetch & return the URL for to the appropriate zipfile.
+ * Also return the Edition number.
+ */
+function getZipFileUrl($geoname, $dateAry) {
+
+  $json_ary         = curlFetch($geoname, 'current');
+  $json_ary_next    = curlFetch($geoname, 'next');
+  $faa_edition_date = faaDate2SQLdate($json_ary->edition[0]->editionDate);
+  $edition          = 0;
+  $secinfo          = [];
+
+  if ($dateAry['my_current_edition_date'] == $faa_edition_date) {
+
+    // We already have this one. Use the Next.
+    $zipUrl  = $json_ary_next->edition[0]->product->url;
+    $edition = $json_ary_next->edition[0]->editionNumber;
+    if (DEBUG) {
+      echo "We already have this chart. Grabbing the 'Next' edition.\n";
+    }
+  }
+  else {
+
+    // We don't already have this one. Use the Current.
+    $zipUrl  = $json_ary->edition[0]->product->url;
+    $edition = $json_ary->edition[0]->editionNumber;
+    if (DEBUG) {
+      echo "We don't already have this chart. Grabbing the 'Current' edition.\n";
+    }
+  }
+  $zipUrl = str_replace(' ', '_', trim($zipUrl));
+  $secinfo['zipUrl'] = $zipUrl;
+  $secinfo['edition'] = trim($edition);
+  return ($secinfo);
+}
+
+/**
+ * CurlFetch($geoname, $edition)
+ * Fetch the JSON for the given geoname +  edition (current | next)
+ * Return JSON as array.
+ */
+function curlFetch($geoname, $edition) {
+  $url = "https://external-api.faa.gov/apra/vfr/sectional/chart?geoname=" . urlencode($geoname) . "&edition=" . $edition . "&format=tiff";
+  $headers = ['Accept: application/json'];
+  echo "Fetching $geoname from $url\n";
+  // Get JSON for path to the downlad.
+  $ch = curl_init();
+  curl_setopt_array($ch, setCurlOpts());
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+  $json = curl_exec($ch);
+  $curlError = trim(curl_error($ch));
+  curl_close($ch);
+
+  if (strlen($curlError) > 1) {
+    echo "CURL Error: $curlError fetching $url\n\n";
+  }
+
+  $json_ary = json_decode($json);
+  if (DEBUG == 1) {
+    $returned_json = print_r($json_ary, TRUE);
+    echo "JSON received from $url is \n$json\n and decoded is $returned_json\n\n";
+  }
+  return($json_ary);
 }
 
 /**
@@ -462,8 +517,8 @@ function optimizeJpgFiles($dirname) {
     $group = filegroup($filename);
     $lastMod = filemtime($filename);
     $cmd1 = "/usr/bin/jpegtran -copy none -progressive -optimize -perfect -outfile \"$filename\" \"$filename\"";
-    if (DEBUG == 1) {
-      echo "     $cmd1\n";
+    if (DEBUG) {
+      // Echo "     $cmd1\n";.
     }
     $tmp1 = `$cmd1`;
     touch($filename, $lastMod);
