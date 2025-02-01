@@ -204,11 +204,11 @@ $readme = file_get_contents($readmeFile);
 
 $p = preg_match("/AIS subscriber files effective date.*[\.\$]/m", $readme, $matches);
 $effDate = trim(preg_replace("/AIS subscriber files effective date/", "", $matches[0]), " .");
+$etag = md5($effDate);
 
 $fh = fopen($includeFile, "w");
-fwrite($fh, "<?php\n\$dataLastModified = \"$effDate\";\n");
+fwrite($fh, "<?php\n\$dataLastModified = \"$effDate\";\n\$airportDataEtag = \"$etag\";\n");
 fclose($fh);
-
 }
 
 
