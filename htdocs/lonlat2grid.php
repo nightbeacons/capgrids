@@ -47,7 +47,7 @@ $displaySectional = ucwords(strtolower(preg_replace("/_/"," ", $sectional)));
 $grid=$result['grid'];
 $quadrant=$result['quadrant'];
 
-$output= "<div align=\"center\" class=\"coord\"><b>$displaySectional ($abbrev) &nbsp; &nbsp; $grid - $quadrant</b></div>";
+$output= "<div align=\"center\" class=\"coord\"><b>$displaySectional ($abbrev)  &nbsp; $grid - $quadrant</b></div>";
 $urlSrc="id=" . $sectional . "&mygrid=" . $grid . "&myquadrant=" . $quadrant . "&myformat=" . $selectedFormat;
 $onload="onLoad=\"javascript:parent.setCornerUrl('" . $urlSrc . "');\"";
 }

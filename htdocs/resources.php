@@ -64,7 +64,7 @@ $filenameHeader = "Content-Disposition: attachment; filename=\"" .$abbrev . "_" 
 
 $sectionalName=ucwords(strtolower(preg_replace("/_/"," ", $sectional)));
 
-#echo "Lon: $gridLon    Lat: $gridLat    $abbrev - $mygrid \n";
+// echo "Lon: $gridLon    Lat: $gridLat    $abbrev - $mygrid \n";
 
 
 ?>
@@ -101,9 +101,8 @@ function changeOpacity(){
 </script>
 
 
-<link rel="stylesheet" href="css/jquery-ui.css" />
-<link href="//fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="/css/jquery-ui.css" />
+<link rel="stylesheet" href="/css/style.css" />
 
   <style type="text/css">
     <!--
@@ -164,7 +163,9 @@ div.clearOverlay {
 echo "<h2 class=\"main\">Google Mapping for $abbrev $mygrid$quadrantDisplay</h2>\n";
 
 
-$kmlURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant;
+// $kmlURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=" . $myquadrant;
+$kmlURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $mygrid . "&myquadrant=E";
+
 $zoom=11;
 if ($myquadrant == "E") $zoom=10;
 $kmlURLencoded = rawurlencode($kmlURL);
@@ -192,13 +193,13 @@ echo "<iframe id=\"bottom\" width=\"475\" style=\"opacity: 0.2;\" height=\"380\"
 echo "<div id=\"slider\" title=\" Adjust Map Tranparency \"></div>\n";
 
 echo "<div id=\"text\">
-&raquo; <a href=\"$kmlURL\">Download Google Earth Overlay for $abbrev $mygrid$quadrantDisplay</a><br>
+&raquo; <a href=\"$kmlURL\">Download Google Earth Overlay for $abbrev $mygrid</a><br>
 &raquo; <a href=\"$fplURL\">Download G1000/G695 Flight Plan file for all quadrants in $abbrev $mygrid</a><br>\n";
 #echo "<input type=\"text\" id=\"amount\" style=\"border: 0; color: #f6931f; font-weight: bold;z-index:-1;\" />\n";
 echo "</div>
 
 </div>\n";
-
+// echo "$TerrainMapiframeSrc<br>$SatMapiframeSrc<br>";
 ?>
 </body>
 </html>

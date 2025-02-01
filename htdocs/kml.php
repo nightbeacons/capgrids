@@ -14,9 +14,8 @@
 # and add a placemark for the given lon/lat
 #
 ######################################################################
-
-include_once("includes/gridFunctions.php");
-include_once("includes/styles.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/includes/gridFunctions.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/includes/styles.php");
 
 $TEST = 0;
 $embed=isset($_GET['embed']);
@@ -63,7 +62,10 @@ $gridLon = $result['NW']['lon'];  # Returns coords of NW corner of grid or quart
 $gridLat = $result['NW']['lat'];  # 
 
 $gridLabel = "$abbrev  $mygrid$quadrantDisplay";
-$filenameHeader = "Content-Disposition: attachment; filename=\"" .$abbrev . "_" . $mygrid . $quadrantDisplay . ".kml\"";
+$kmlFilename = $abbrev . "_" . $mygrid . $quadrantDisplay . ".kml";
+$eTag = 'ETag: "' . md5($abbrev . "_" . $mygrid . $quadrantDisplay) . '"';
+
+$filenameHeader = "Content-Disposition: attachment; filename=\"" . $kmlFilename . "\"";
 
 
 #echo "Lon: $gridLon    Lat: $gridLat    $abbrev - $mygrid \n";
@@ -139,8 +141,18 @@ landis@mac.com]]></description>
 }
 
 header($kmlHeader);
-header($filenameHeader);
+$content_length_header = "Content-Length: " . strlen($buffer);
+header($content_length_header);
+// $lastMod_Header = "Last-Modified: " . date(DATE_RFC7231);
+$lastMod_Header = "Last-Modified: Wed, 15 Nov 2023 15:52:16 GMT";
+header($lastMod_Header);
+header($eTag);
+header("Accept-Ranges: bytes");
 
+if (!$embed) {header($filenameHeader);}
+
+//$kmlFileSave = $_SERVER['DOCUMENT_ROOT'] . "/kml/" . $kmlFilename;
+//file_put_contents($kmlFileSave, $buffer);
 echo "$buffer";
 
 # ===================================================================================================

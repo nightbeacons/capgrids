@@ -1,7 +1,7 @@
 <?php
 # Grid Functions
 date_default_timezone_set("UTC"); 
-include_once("coordinates.php");
+include_once("/var/www/capgrids/htdocs/includes/coordinates.php");
 include_once("/var/www/capgrids/pwf/keys.php");
 
 # ============================================== Globals ===========================================
@@ -446,6 +446,7 @@ curl_setopt($ch, CURLOPT_URL, $geolocationURL);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);    // Timeout in 4 seconds
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
 curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
 //curl_setopt($ch, CURLOPT_REFERER, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3 GTB7.0");
 $output = curl_exec($ch);
@@ -460,15 +461,17 @@ $latLonAry = explode(",", $output);
 
 $latlonAry = lonlat2grid($longitude, $latitude);
 $sectional = $latlonAry['sectional'];
+$grid      = $latlonAry['grid'];
+$quadrant  = $latlonAry['quadrant'];
 
-//  $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
-//  $fh = fopen($logfile, "a");
-//  $record = "----------\ngeolocationURL = $geolocationURL\n";
-//  $record .= "Return value from geolocationURL = " . print_r($output, TRUE);
-//  $record .= "Lat = " . $latitude . "\tLon = " . $longitude . "\tSectional = " . $sectional . "\n";
-//  fwrite($fh, $record);
-//  fclose($fh);
-
+  $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
+  $fh = fopen($logfile, "a");
+  $record = "----------\n" . date() . "\ngeolocationURL = $geolocationURL\n";
+  $record .= "Return value from geolocationURL = " . print_r($output, TRUE);
+  $record .= "Lat = " . $latitude . "\tLon = " . $longitude . "\tSectional = " . $sectional . "\n";
+  $record .= "Grid = $grid \tQuadrant = $quadrant\n";
+  fwrite($fh, $record);
+  fclose($fh);
 $sectionalArray = array('name'       => $latlonAry['sectional'],
                         'grid'       => $latlonAry['grid'],
                         'quadrant'   => $latlonAry['quadrant'],
@@ -727,14 +730,14 @@ function getCompassDirection($bearing) {
  */
 
 function GetCivilTwilight($lat, $lon) {
-global $googleAPIkey;
+global $googleTZkey;
 
 // zenith value set to 96 for civil twilight times
 $zenith       = 96;    
 $twilight = array();
 
 // Get TZ offset (including DST adjustments) for current lat + lon.  
-$url = "https://maps.googleapis.com/maps/api/timezone/json?location=" . $lat . "," . $lon . "&timestamp=" . time() . "&key=" . $googleAPIkey;
+$url = "https://maps.googleapis.com/maps/api/timezone/json?location=" . $lat . "," . $lon . "&timestamp=" . time() . "&key=" . $googleTZkey;
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -765,4 +768,64 @@ return($twilight);
 }
 
 
+/**
+ * Grid2cell
+ * Accept a lat/lon array from grid2lontal
+ * Return cell label.
+ *
+ * Cell system is based on the SE corner of the grid
+ * Sample return val from grid2lonlat is:
+ *     [SE] => Array
+ *     (
+ *          [lon] => -120&deg; 7.5'
+ *          [lat] => 47&deg; 52.5'
+ *      )
+ */
+function grid2cell($sectional, $gridNum, $quadrant = "E") {
+  $alpha = ['A', 'B', 'C', 'D'];
+  $cell = "";
+
+  $latlon_ary = grid2lonlat($sectional, $gridNum, $quadrant);
+  $lat = explode("&deg;", $latlon_ary['SE']['lat']);
+  $lat_deg = $lat[0] + 0;
+  $lat_min = trim($lat[1], " '");
+
+  $lon = explode("&deg;", $latlon_ary['SE']['lon']);
+  $lon_deg = abs($lon[0]) + 0;
+  $lon_min = trim($lon[1], " '");
+
+  // Example: "48093".
+  $cell = $lat_deg . sprintf('%03d', $lon_deg);
+
+  $suffix = resolveCellGrid($lat_min, $lon_min, 30, $quadrant);
+  $cell .= $suffix;
+return($cell);
+}
+
+
+/**
+ * resolveCellGrid
+ * Recursive function to move coords into SE corner, then determine grid letter
+ *  Accepts:
+ *    - The 'minute' value of the lat and lon of the SE corner,
+ *    - The required resolution (default = 30 min when initially calling the function)
+ *    - The quadrant (A, B, C, D, E) E = Entire grid
+ *    - Cell identifier (empty when initially calling the function
+ *  Return the alphabetic (suffix) portion of the cell grid identifier. 
+ */
+function resolveCellGrid($lat_min, $lon_min, $resolution, $quadrant, $cell = "") {
+  $res_limit = ($quadrant == 'E') ? 8 : 4;
+  if ($resolution > $res_limit ) {
+    $alpha = ['A', 'B', 'C', 'D'];
+
+    $lat_min_new_SE = $lat_min - ($lat_min > $resolution) * $resolution;
+    $lon_min_new_SE = $lon_min - ($lon_min > $resolution) * $resolution;
+    $letter = (($lat_min_new_SE < ($resolution / 2)) * 2) + (($lon_min_new_SE < ($resolution / 2)));
+
+    $resolution = $resolution / 2;
+    $cell .= $alpha[$letter];
+    $cell = resolveCellGrid($lat_min_new_SE, $lon_min_new_SE, $resolution, $quadrant, $cell);
+  }
+  return($cell);
+}
 ?>

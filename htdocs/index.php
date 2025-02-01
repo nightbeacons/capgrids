@@ -1,5 +1,5 @@
 <?php
-include_once("includes/gridFunctions.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/includes/gridFunctions.php");
 
 $sectionalAry = ourSectional();
 $default_sectional = $sectionalAry['name'];
@@ -9,21 +9,22 @@ $default_sectional = $sectionalAry['name'];
 //echo "<pre>";
 //print_r($sectionalAry);
 //echo "</pre>";
-?>
+//?>
 <!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Language" content="en-us">
 <title>CAPgrids | Civil Air Patrol Emergency Services</title>
-<link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="dns-prefetch" href="//www.ngdc.noaa.gov">
 <link rel="dns-prefetch" href="//www.google-analytics.com">
+<link rel="preconnect"   href="//maps.googleapis.com">
 <link rel="dns-prefetch" href="//maps.googleapis.com">
+<link rel="preconnect"   href="//ipinfo.io">
+<link rel="dns-prefetch" href="//ipinfo.io">
 
-<link rel="stylesheet" type="text/css" href="/css/style.css">
+<link rel="stylesheet" type="text/css" href="/css/style.css"  media="print" onload="this.media='all'">
 <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
 <meta name="description" 
 	content="Search-and-Rescue grid tool for Civil Air Patrol Emergency Services teams. The Swiss Army Knife of Search Grids, it calculates grid corners and grid identifiers for any US Sectional chart. It also provides adjustable maps, downloadable gridded sectionals, Google Earth overlays with current sectionals, and large map printouts.">
 <meta name="keywords" 
@@ -34,54 +35,51 @@ $default_sectional = $sectionalAry['name'];
 <script type="text/javascript" async src="/js/jquery.js"></script>
 
 <script language="JavaScript" type="text/javascript">
-
   function gridHandler() {
     var sectionalCode = document.gridPulldown.sectionalMenu.options[document.gridPulldown.sectionalMenu.selectedIndex].value;
     document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectionalCode;
     document.getElementById('win1').src = 'grid2lonlat.php?id=' + sectionalCode;
+    document.getElementById('winprint').src = 'print.php?id=' + sectionalCode;
+
+
   }
 
   function setCornerUrl(newurl) {
   	document.getElementById('win1').src='grid2lonlat.php?' + newurl; 
+        document.getElementById('winprint').src='print.php?' + newurl;
+
   }
   function setGridWindow(sectional, grid, quadrant) {
   document.getElementById('gridwin').src = 'gridinfo.php?id=' + sectional;
-//  document.getElementById('sectionalMenu').options[sectional].selected = true;
+document.getElementById('sectionalMenu').options[sectional].selected = true;
   document.getElementById('resources').src = 'resources.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
   document.getElementById('nearest').src = 'nearestAirports.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
+  document.getElementById('winprint').src = 'print.php?id=' + sectional + '&mygrid=' + grid + '&myquadrant=' + quadrant;
+
   }
 
   function printHandler() {
-  var win1Handle = document.getElementById('win1');
+  var win1Handle = document.getElementById('winprint');
   var resHandle  = document.getElementById('resources');
   var op1 = window.frames['resources'].document.getElementById('top').style.opacity;
   var op2 = 1 - op1;
-  window.frames['win1'].document.getElementById('topmap').style.opacity= op1;
-  window.frames['win1'].document.getElementById('bottommap').style.opacity= op2;
-
+  window.frames['winprint'].document.getElementById('topmap').style.opacity= op1;
+  window.frames['winprint'].document.getElementById('bottommap').style.opacity= op2;
   $("win1Handle").ready(function() {
        win1Handle.contentWindow.focus();
        win1Handle.contentWindow.print();
   });
   return false;
   }
+
+function sleep(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
   </script>
 
-<!-- Hotjar Tracking Code for https://www.capgrids.com -->
-<script>
-    (function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:2268211,hjsv:6};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);
-    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-</script>
 </head>
 <body style="margin:0;">
-<?php include_once("includes/fb.php") ?>
-<?php include_once("includes/ga.php") ?>
+
 <table dir="ltr" border="0" cellpadding="0" cellspacing="0" width="100%" style="position:relative;">
 <tr><td class="pageBG pageBGleft" style="width:auto;" rowspan="3"><td style="width:850px;"><a href="/"><img style="width:850;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><div class="bannerOverlay"><h1 class="overlay">CAPgrids</h1><h3 class="overlay">The Swiss-Army Knife of Search Grids<h3></div><hr></td><td class="pageBG pageBGright" style="width:auto;" rowspan="3"></tr>
 
@@ -109,19 +107,19 @@ drawSectionalOptions($default_sectional);
 
 </td><td valign="top" width="240" bgcolor="#fef0f0">
 <?php
-include_once("help/searchgrid.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/help/searchgrid.php");
 ?>
 </td>
 	</tr>
 <tr><td colspan="2"><hr></td></tr>
 
-<tr><td valign="top"><h2 class="main">Find a Grid</h2>
+<tr><td valign="top"><h2 class="main" style="margin-top:0;">Find a Grid</h2>
 
-<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:10em;" data-hj-allow-iframe="" ></IFRAME>
+<IFRAME id="win2" name="win2" marginWidth=0 marginHeight=0 src="lonlat2grid.php?lon=<?php echo $sectionalAry['longitude'];?>&lat=<?php echo $sectionalAry['latitude'];?>" frameBorder=0 scrolling=no style="width:500px; height:11rem;" data-hj-allow-iframe="" ></IFRAME>
 </td>
 <td valign="top" bgcolor="#fef0f0" width-"240">
 <?php
-include_once("help/findgrid.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/help/findgrid.php");
 ?>
 </td></tr>
 
@@ -131,10 +129,11 @@ include_once("help/findgrid.php");
 <img align="right"  src="/images/btn_print.gif" onclick="javascript:printHandler();" class="printbutton" style="position:relative;bottom:30px;margin-right:20px;cursor:pointer;cursor:hand;">
 
 <IFRAME id="win1" name="win1" marginWidth=0 marginHeight=0 src="grid2lonlat.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 data-hj-allow-iframe="" ></IFRAME>
+
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
-include_once("help/findcorners.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/help/findcorners.php");
 ?>
 </td></tr>
 <tr><td colspan="2"><hr></td></tr>
@@ -143,7 +142,7 @@ include_once("help/findcorners.php");
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
-include_once("help/resources.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/help/resources.php");
 ?>
 </td></tr>
 
@@ -157,7 +156,7 @@ include_once("help/resources.php");
 </td>
 <td valign="top" bgcolor="#fef0f0" width="240">
 <?php
-include_once("help/nearest.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/help/nearest.php");
 ?>
 </td></tr>
 
@@ -170,5 +169,6 @@ include_once("help/nearest.php");
 	<!-- ======================= -->
 </td></tr>
 <tr><td><?php include $_SERVER['DOCUMENT_ROOT'] . "/includes/footer.php"; ?></td></tr></table>
+<IFRAME style="visibility:hidden;position:absolute;top:0;z-index:-99;" id="winprint" name="winprint" marginWidth=0 marginHeight=0 src="print.php?id=<?php echo $default_sectional;?>&mygrid=<?php echo $sectionalAry['grid'];?>&myquadrant=<?php echo $sectionalAry['quadrant'];?>" frameBorder=0 width=500 scrolling=no height=300 data-hj-allow-iframe="" ></IFRAME>
 </body>
 </html>

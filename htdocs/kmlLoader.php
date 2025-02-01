@@ -1,3 +1,37 @@
+<?php
+include_once($_SERVER['DOCUMENT_ROOT'] . "/includes/gridFunctions.php");
+include_once("/var/www/capgrids/pwf/keys.php");
+$gridBoxAry = grid2lonlat($_GET['id'], $_GET['mygrid'], $_GET['myquadrant'], 'raw');
+$avgLat = ($gridBoxAry['NW']['lat'] + $gridBoxAry['SW']['lat']) / 2;
+$avgLon = ($gridBoxAry['NW']['lon'] + $gridBoxAry['NE']['lon']) / 2;
+$MapTypeId=$_GET['MapTypeId'];
+$qs = $_SERVER['QUERY_STRING'];
+
+//$url = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
+//$url = "https://dev.capgrids.com/kml/149/D/TERRAIN/1/SEATTLE.kml";
+$url = "https://www.capgrids.com/kml/" . $_GET['mygrid'] . "/" . $_GET['myquadrant'] . "/" . $_GET['MapTypeId'] . "/" . $_GET['embed'] . "/" . $_GET['id'] . ".kml";
+//$url = "https://dev.capgrids.com/SEATTLE.kml";
+
+$initMap = "
+function initMap() {
+  const map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 11,
+    zoomControl: false,
+    scaleControl: false,
+    disableDefaultUI: true,
+    streetViewControl: false,
+    mapTypeControl: false,
+    mapTypeId: google.maps.MapTypeId." . $MapTypeId . ",
+ //   center: {lat: " . $avgLat . ", lng: " . $avgLon . "}
+  });
+
+  const ctaLayer = new google.maps.KmlLayer({
+    url: \"" . $url . "\",
+    map: map,
+  });
+}\n"; 
+
+?>
 <!DOCTYPE html>
 <html>
   <head>
@@ -14,50 +48,17 @@
         height: 100%;
       }
     </style>
+    <script>
+    <?php echo $initMap; ?>
+    </script>
   </head>
   <body>
-    <div id="map"></div>
-    <script>
+    <div id="map" style="height:100%;"></div>
 <?php
-include_once("includes/gridFunctions.php");
-include_once("/var/www/capgrids/pwf/keys.php");
-$gridBoxAry = grid2lonlat($_GET['id'], $_GET['mygrid'], $_GET['myquadrant'], 'raw');
-$avgLat = ($gridBoxAry['NW']['lat'] + $gridBoxAry['SW']['lat']) / 2;
-$avgLon = ($gridBoxAry['NW']['lon'] + $gridBoxAry['NE']['lon']) / 2;
-$MapTypeId=$_GET['MapTypeId'];
+$mapUrl = "https://maps.googleapis.com/maps/api/js?key=" . $googleAPIkey . "&loading=async&callback=initMap";
+echo "<script defer src=\"" . $mapUrl . "\">\n</script>\n";
 
-echo "
-function initMap() {
-  var map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 11,
-    zoomControl: false,
-    scaleControl: false,
-    streetViewControl: false,
-    mapTypeId: google.maps.MapTypeId." . $MapTypeId . ",
- //   center: {lat: " . $avgLat . ", lng: " . $avgLon . "}
-  });
-
-  var ctaLayer = new google.maps.KmlLayer({
-";
-
-$qs = $_SERVER['QUERY_STRING'];
-// $url = "http://www.painefieldcap.org/g2/kml.php?" . $qs;
-$url = "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
-echo "    url: '" . $url . "',";
-?>
-    map: map
-  });
-}
-
-    </script>
-<?php
-$mapUrl = "https://maps.googleapis.com/maps/api/js?key=" . $api_key . "&signed_in=true&callback=initMap";
-echo "<script async defer src=\"" . $mapUrl . "&signed_in=true&callback=initMap\">\n</script>\n";
-
-
-
-// echo "http://www.painefieldcap.org/g2/kml.php?" . $qs;
-echo "http://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
+//echo "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?" . $qs;
 ?>
   </body>
 </html>

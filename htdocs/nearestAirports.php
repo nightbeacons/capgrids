@@ -1,9 +1,13 @@
 <?php
-$etag = 'etag: "' . time() . '"';
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
-header('Expires: 0');
+include_once("includes/gridFunctions.php");
+// include_once("includes/simple_html_dom.php");
+include_once("/var/www/capgrids/pwf/apt.php");
+include_once("includes/lastMod.php");
+
+$etag = 'etag: "' . $airportDataEtag . '"';
+header("Cache-Control: no-cache");  // https://stackoverflow.com/questions/55025948/does-the-etag-header-make-the-cache-control-header-obsolete-how-to-make-sure-ca
 header($etag);
+$SELF= $_SERVER['PHP_SELF'];
 ?>
 <!doctype html>
 <html lang="en">
@@ -11,15 +15,8 @@ header($etag);
 <meta charset="utf-8" />
 <link rel="stylesheet" href="/css/style.css" />
 <?php
-include_once("includes/gridFunctions.php");
-include_once("includes/simple_html_dom.php");
-include_once("/var/www/capgrids/pwf/apt.php");
-include_once("includes/lastMod.php");
-
 //$cmd = "stat --format=%Z " .  $_SERVER['DOCUMENT_ROOT'] . "/data";
 //$dataLastModified = date("j-M-Y", trim(`$cmd`));
-
-$SELF= $_SERVER['PHP_SELF'];
 
 $db =  new mysqli($dbserver, $dbuser, $dbpass, $dbname);
   if (mysqli_connect_errno()){
@@ -46,8 +43,7 @@ $lonGridCenter = ($result['NW']['lon'] + $result['NE']['lon'])/2;
 
 $airports = getNearestAirports($latGridCenter, $lonGridCenter, 100, $numAirports);
 
-echo "<link href=\"https://fonts.googleapis.com/css?family=Roboto+Condensed\" rel=\"stylesheet\">
-<style type=\"text/css\">\n";
+echo "<style type=\"text/css\">\n";
   if ($embed) {
   echo "div.nearestApt {
           font-size: 8.5pt;
@@ -74,7 +70,7 @@ echo "</style>\n";
 echo "</head>
 <body style=\"margin:0;\">";
 
-$html = "<h2 class=\"main nearest\">Nearest Airports to Center of $gridLabel</h2>";
+$html = "<h2 class=\"main nearest\">Nearest Airports to Center of <nobr>$gridLabel</nobr></h2>";
 
   if ($embed){
      //  Code for PRINT version
