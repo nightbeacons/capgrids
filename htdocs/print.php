@@ -1,34 +1,66 @@
 <?php
-################################################################
-#
-# Find Grid Corners
-#
-# To debug print-only version, use URLs of the form http://www.capgrids.com/grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B&dev=1#
-#
-################################################################
+
+/**
+ * @file
+ */
+
+//
+// Find Grid Corners
+//
+// To debug print-only version, use URLs of the form http://www.capgrids.com/grid2lonlat.php?id=SEATTLE&mygrid=139&myquadrant=B&dev=1#
+//
+//
 error_reporting(1);
-include_once("includes/gridFunctions.php");
+include_once "includes/gridFunctions.php";
 
 global $mapType;
 
-$onload="";
-        if (isset($_GET['id'])) {$sectional=$_GET['id'];} else {$sectional="SEATTLE";}
-        if (isset($_GET['mygrid'])) {$selectedGrid=$_GET['mygrid'];} else {$selectedGrid=findDefaultGridNumber($sectional);}
-        if (isset($_GET['myquadrant'])) {$selectedQuadrant=strtoupper($_GET['myquadrant']);} else {$selectedQuadrant="E";}
-        if (isset($_GET['myformat'])) {$selectedFormat=$_GET['myformat'];} else {$selectedFormat="dmm";}
-	if (isset($_GET['dev'])) {$debugPrintVersion=1;} else {$debugPrintVersion=0;}   		         # Use for development & debugging. Reverses sense of print/screen CSS
-	if ((isset($_GET['dev'])) AND (isset($_GET['delay']))) {$delay = $_GET['delay'];} else {$delay = 0;}	 # Used with 'dev' flag to introduce delays for CLI printing of PDFs
-														 # Recommended delay = 8500
-//	if (isset($_GET['id'])) {
-//		$onload="onload=\"javascript:onloadHandler();\"";
-//	}
-
-$abbrev=$coordinates[$sectional]['Abbrev'];
+$onload = "";
+if (isset($_GET['id'])) {
+  $sectional = $_GET['id'];
+}
+else {
+  $sectional = "SEATTLE";
+}
+if (isset($_GET['mygrid'])) {
+  $selectedGrid = $_GET['mygrid'];
+}
+else {
+  $selectedGrid = findDefaultGridNumber($sectional);
+}
+if (isset($_GET['myquadrant'])) {
+  $selectedQuadrant = strtoupper($_GET['myquadrant']);
+}
+else {
+  $selectedQuadrant = "E";
+}
+if (isset($_GET['myformat'])) {
+  $selectedFormat = $_GET['myformat'];
+}
+else {
+  $selectedFormat = "dmm";
+}
+if (isset($_GET['dev'])) {
+  $debugPrintVersion = 1;
+}
+else {
+  $debugPrintVersion = 0;
+}                    // Use for development & debugging. Reverses sense of print/screen CSS
+if ((isset($_GET['dev'])) and (isset($_GET['delay']))) {
+  $delay = $_GET['delay'];
+}
+else {
+  $delay = 0;
+}     // Used with 'dev' flag to introduce delays for CLI printing of PDFs
+// Recommended delay = 8500
+//    if (isset($_GET['id'])) {
+//        $onload="onload=\"javascript:onloadHandler();\"";
+//    }
+$abbrev = $coordinates[$sectional]['Abbrev'];
 
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
 <title><?php echo "$abbrev $selectedGrid"; ?> </title>
 <meta name="robots" content="noindex, nofollow">
@@ -42,8 +74,8 @@ echo $my_css;
 
   function reloadHandler() {
         var sectionalCode = document.findCorners.sectionalCorners.options[document.findCorners.sectionalCorners.selectedIndex].value;
-	var gridCode = document.findCorners.selectGrid.options[document.findCorners.selectGrid.selectedIndex].value;
-//	var gridCode = document.findCorners.selectGrid.value;
+    var gridCode = document.findCorners.selectGrid.options[document.findCorners.selectGrid.selectedIndex].value;
+//    var gridCode = document.findCorners.selectGrid.value;
 
         var quadCode = document.findCorners.selectQuadrant.options[document.findCorners.selectQuadrant.selectedIndex].value;
         var formatCode = document.findCorners.selectFormat.options[document.findCorners.selectFormat.selectedIndex].value;
@@ -53,14 +85,14 @@ echo $my_css;
   }
 
   function onloadHandler() {
-	<?php echo "parent.setGridWindow('" . $sectional . "', '" . $selectedGrid . "', '" . $selectedQuadrant . "');"; ?>
+  <?php echo "parent.setGridWindow('" . $sectional . "', '" . $selectedGrid . "', '" . $selectedQuadrant . "');"; ?>
   }
 
   function pageReady(){
-	var op1 = parent.frames['resources'].document.getElementById('top').style.opacity;
-	var op2 = 1 - op1;
-	document.getElementById('topmap').style.opacity    = op1;
-	document.getElementById('bottommap').style.opacity = op2;
+    var op1 = parent.frames['resources'].document.getElementById('top').style.opacity;
+    var op2 = 1 - op1;
+    document.getElementById('topmap').style.opacity    = op1;
+    document.getElementById('bottommap').style.opacity = op2;
   }
 
   function resizeIframe(obj) {
@@ -70,78 +102,82 @@ echo $my_css;
 
 </head>
 <?php
-$showPrintVersion=1;
-        if ($debugPrintVersion){
-        echo "<body onload=\"javascript:pageReady();\">\n";
-        $showPrintVersion = !$showPrintVersion;
-        } else {
-        echo "<body $onload>\n";
-        }
-$showPrintVersion=1;
+$showPrintVersion = 1;
+if ($debugPrintVersion) {
+  echo "<body onload=\"javascript:pageReady();\">\n";
+  $showPrintVersion = !$showPrintVersion;
+}
+else {
+  echo "<body $onload>\n";
+}
+$showPrintVersion = 1;
 
-//  Screen Display Below //
-//phpinfo();
+// Screen Display Below //
+// phpinfo();
+$displayQuadrant = " - " . $selectedQuadrant;
+if ($selectedQuadrant == "E") {
+  $displayQuadrant = "";
+}
 
-
-$displayQuadrant= " - " . $selectedQuadrant;
-if ($selectedQuadrant == "E") $displayQuadrant="";
-
-$cellWidth=100;
+$cellWidth = 100;
 
 $result = grid2lonlat($sectional, $selectedGrid, $selectedQuadrant, $selectedFormat);
 $resultRaw = grid2lonlat($sectional, $selectedGrid, $selectedQuadrant, "raw");
 
 $SurroundingGrids = GetSurroundingGridIDs($sectional, $selectedGrid, $selectedQuadrant, $selectedFormat);
 
-$avgLon=($resultRaw['NW']['lon'] + $result['NE']['lon'])/2;
-$avgLat=($resultRaw['NW']['lat'] + $result['SW']['lat'])/2;
-$variation =  $variationSigned = magVariation($avgLat, $avgLon);
-$varDir="W";
-	if ($variation < 0) {
-	$varDir="E";
-	$variation=abs($variation);
-	}
+$avgLon = ($resultRaw['NW']['lon'] + $result['NE']['lon']) / 2;
+$avgLat = ($resultRaw['NW']['lat'] + $result['SW']['lat']) / 2;
+$variation = $variationSigned = magVariation($avgLat, $avgLon);
+$varDir = "W";
+if ($variation < 0) {
+  $varDir = "E";
+  $variation = abs($variation);
+}
 $northSteer = 360 + $variationSigned;
-   if ($northSteer >= 360) $northSteer -= 360;
+if ($northSteer >= 360) {
+  $northSteer -= 360;
+}
 
-$steer = array("North" => sprintf("%03d", floor($northSteer + 0.5)),
-               "East"  => sprintf("%03d", floor(90 + $variationSigned + 0.5)),
-               "South" => floor(180 + $variationSigned + 0.5),
-               "West"  => floor(270 + $variationSigned + 0.5)
-         );
+$steer = [
+  "North" => sprintf("%03d", floor($northSteer + 0.5)),
+  "East"  => sprintf("%03d", floor(90 + $variationSigned + 0.5)),
+  "South" => floor(180 + $variationSigned + 0.5),
+  "West"  => floor(270 + $variationSigned + 0.5),
+];
 
 $CTwilight = GetCivilTwilight($avgLat, $avgLon);
 
 
-// Beginning of Print Display
+// Beginning of Print Display.
 ?>
 <table border="0" cellspacing="0" cellpadding="5" width="650" align="center">
 <tr valign="bottom"><td valign="middle" align="center"  rowspan="4">
-&larr;<br><?php echo $coordinates[$SurroundingGrids['West']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['West']['grid'] . $SurroundingGrids['West']['quadrant'];  ?></nobr> <br>&larr;</td><td align="center" colspan="3"><b><?php echo $coordinates[$sectional]['Abbrev'] . "&nbsp;" .  $selectedGrid . $displayQuadrant; ?></b></td>
+&larr;<br><?php echo $coordinates[$SurroundingGrids['West']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['West']['grid'] . $SurroundingGrids['West']['quadrant'];  ?></nobr> <br>&larr;</td><td align="center" colspan="3"><b><?php echo $coordinates[$sectional]['Abbrev'] . "&nbsp;" . $selectedGrid . $displayQuadrant; ?></b></td>
 <td valign="middle" align="center"  rowspan="4">
 &rarr;<br><?php echo $coordinates[$SurroundingGrids['East']['sectional']]['Abbrev'] . " <nobr>" . $SurroundingGrids['East']['grid'] . $SurroundingGrids['East']['quadrant'];  ?></nobr> <br>&rarr;</td></tr>
 <tr valign="bottom"><td align="left" class="coord" width="162"><?php echo $result['NW']['lat'] . "<br>" . $result['NW']['lon']; ?></td><td align="center" width="50%">&uarr;&nbsp;
 <?php echo $coordinates[$SurroundingGrids['North']['sectional']]['Abbrev'] . " " . $SurroundingGrids['North']['grid'] . $SurroundingGrids['North']['quadrant'];  ?> &nbsp;&uarr;</td><td align="right" class="coord" width="162"><?php echo $result['NE']['lat'] . "<br>" . $result['NE']['lon']; ?></td></tr>
-<tr valign="top"><td align="center" colspan="3"><div style="position: relative;"><img src="/images/spacer.gif" style="margin:0;padding:0;width:645px;height:685px;"><?php
+<tr valign="top"><td align="center" colspan="3"><div style="position: relative;"><img src="/images/spacer.gif" style="margin:0;padding:0;width:645px;height:685px;" alt=""><?php
 $kmlURL = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kml.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&embed=1";
 
 $kmlURLencoded = rawurlencode($kmlURL);
-$zoom=12;
-if ($selectedQuadrant=="E") $zoom=11;
+$zoom = 12;
+if ($selectedQuadrant == "E") {
+  $zoom = 11;
+}
 
-//$TerrainMapiframeBase= "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
-//$TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
-
+// $TerrainMapiframeBase= "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['terrain'] . "&amp;output=embed&amp;";
+// $TerrainMapiframeSrc  = $TerrainMapiframeBase .  "&amp;z=" . $zoom;
 $TerrainMapiframeSrc = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=TERRAIN&embed=1";
 
-$SatMapiframeBase= "https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
-$SatMapiframeSrc  = $SatMapiframeBase .  "&amp;z=" . $zoom;
+$SatMapiframeBase = "https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "%26embed%3D1&amp;ie=UTF8&amp;t=" . $mapType['satellite'] . "&amp;output=embed&amp;";
+$SatMapiframeSrc  = $SatMapiframeBase . "&amp;z=" . $zoom;
 
-$SatMapiframeSrc  = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=HYBRID&embed=1";
+$SatMapiframeSrc = "https://" . $_SERVER['SERVER_NAME'] . preg_replace("/(.*\/).*/", "$1", $_SERVER['PHP_SELF']) . "kmlLoader.php?id=" . $sectional . "&mygrid=" . $selectedGrid . "&myquadrant=" . $selectedQuadrant . "&MapTypeId=HYBRID&embed=1";
 
-#$iframeSrc = "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=" . $zoom . "&amp;output=embed";
+// $iframeSrc = "//maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=" . $zoom . "&amp;output=embed";
 // $iframeHref = "https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=" . $kmlURLencoded . "&amp;ie=UTF8&amp;t=p&amp;z=10";
-
 echo "<iframe id=\"topmap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $TerrainMapiframeSrc . "\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>";
 
 echo "<iframe id=\"bottommap\" width=\"645\" height=\"680\" style=\"opacity:0.5;\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\" src=\"" . $SatMapiframeSrc . "\"></iframe>";
@@ -174,38 +210,37 @@ $nearestURLencoded = rawurlencode($nearestURL);
 </body>
 </html>
 <?php
-# ===================================================================================================
-# Find the starting grid number (not always 1)
-#
-
+/**
+ * ===================================================================================================
+ * Find the starting grid number (not always 1)
+ */
 function findDefaultGridNumber($sectional) {
 
-global $coordinates;
+  global $coordinates;
 
-$startingGrid=1;
+  $startingGrid = 1;
 
-	if (isset($coordinates[$sectional]['nullgrid'])) {
-	$idx = 0;
-		do {$idx++;}
-		while (in_array($idx, $coordinates[$sectional]['nullgrid']));
-	$startingGrid = $idx;
-	}
+  if (isset($coordinates[$sectional]['nullgrid'])) {
+    $idx = 0;
+    do {
+      $idx++;
+    } while (in_array($idx, $coordinates[$sectional]['nullgrid']));
+    $startingGrid = $idx;
+  }
 
-
-return ($startingGrid);
+  return ($startingGrid);
 }
 
 /**
- *
  * Create the CSS, accounting for debug mode
- * Return the CSS code
+ * Return the CSS code.
  */
-function build_css($debugPrintVersion){
+function build_css($debugPrintVersion) {
 
-$css = "<style type=\"text/css\">\n";
+  $css = "<style type=\"text/css\">\n";
 
-// Global CSS
-$css .= ".coord {
+  // Global CSS.
+  $css .= ".coord {
         font-family: Arial, Helvetica;
         font-size: 10pt;
         }
@@ -220,16 +255,15 @@ $css .= ".coord {
    margin: 0cm;
 }\n";
 
+  // CSS for the screen display.
+  if ($debugPrintVersion == 1) {
+    $css .= "@media print {\n";
+  }
+  else {
+    $css .= "@media screen {\n";
+  }
 
-// CSS for the screen display
-
-   if ($debugPrintVersion == 1){
-     $css .= "@media print {\n";
-   } else {
-     $css .= "@media screen {\n";
-   }
-
-$css .= "div.printonly {
+  $css .= "div.printonly {
         display: block;
         visibility: hidden;
         margin:0pt 18pt 0pt 18pt;
@@ -244,17 +278,15 @@ div.screenonly {
         }
 }\n";
 
+  // CSS for the Print display.
+  if ($debugPrintVersion == 1) {
+    $css .= "@media screen {\n";
+  }
+  else {
+    $css .= "@media print {\n";
+  }
 
-
-// CSS for the Print display
-
-   if ($debugPrintVersion == 1){
-     $css .= "@media screen {\n";
-   } else {
-     $css .= "@media print {\n";
-   }
-
-$css .= "body {
+  $css .= "body {
     margin: 0;
   }
 div.printonly {
@@ -269,8 +301,7 @@ div.screenonly {
         }
 }\n";
 
-$css .= "</style>\n";
+  $css .= "</style>\n";
 
-return ($css);
+  return ($css);
 }
-

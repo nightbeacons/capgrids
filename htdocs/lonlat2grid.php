@@ -55,8 +55,7 @@ $onload="onLoad=\"javascript:parent.setCornerUrl('" . $urlSrc . "');\"";
 $googleMapUrl="http://maps.google.com/maps?f=q&hl=en&geocode=&q=$rawLat,$rawLon&ie=UTF8&t=h&z=8&iwloc=addr";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-
+<html lang="en">
 <head>
 <meta name="robots" content="noindex, nofollow">
   <style type="text/css">

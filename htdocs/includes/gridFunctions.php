@@ -403,6 +403,7 @@ $api_key = "&key=" . $noaa_key;
 $format = "&resultFormat=xml";                  # Format of calculation results: 'html', 'csv', 'xml', or 'pdf'
 
 $url=$baseUrl . "?lat1=" . trim($lat) .  "&lon1=" . trim($lon) . $api_key . $format;
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -769,23 +770,18 @@ return($twilight);
 
 
 /**
- * Grid2cell
- * Accept a lat/lon array from grid2lontal
- * Return cell label.
- *
- * Cell system is based on the SE corner of the grid
- * Sample return val from grid2lonlat is:
- *     [SE] => Array
- *     (
- *          [lon] => -120&deg; 7.5'
- *          [lat] => 47&deg; 52.5'
- *      )
+ * Grid2cell($sectional, $gridNum, $quadrant = "E")
+ *  Accepts:
+ *    - Full sectional name (i.e. "SEATTLE")
+ *    - Grid number
+ *    - Quadrant (A/B/C/D or use "E" for Entire grid)
+ *  Return the alphabetic (suffix) portion of the cell grid identifier.
  */
 function grid2cell($sectional, $gridNum, $quadrant = "E") {
   $alpha = ['A', 'B', 'C', 'D'];
   $cell = "";
-
   $latlon_ary = grid2lonlat($sectional, $gridNum, $quadrant);
+
   $lat = explode("&deg;", $latlon_ary['SE']['lat']);
   $lat_deg = $lat[0] + 0;
   $lat_min = trim($lat[1], " '");
@@ -797,34 +793,18 @@ function grid2cell($sectional, $gridNum, $quadrant = "E") {
   // Example: "48093".
   $cell = $lat_deg . sprintf('%03d', $lon_deg);
 
-  $suffix = resolveCellGrid($lat_min, $lon_min, 30, $quadrant);
-  $cell .= $suffix;
-return($cell);
-}
-
-
-/**
- * resolveCellGrid
- * Recursive function to move coords into SE corner, then determine grid letter
- *  Accepts:
- *    - The 'minute' value of the lat and lon of the SE corner,
- *    - The required resolution (default = 30 min when initially calling the function)
- *    - The quadrant (A, B, C, D, E) E = Entire grid
- *    - Cell identifier (empty when initially calling the function
- *  Return the alphabetic (suffix) portion of the cell grid identifier. 
- */
-function resolveCellGrid($lat_min, $lon_min, $resolution, $quadrant, $cell = "") {
-  $res_limit = ($quadrant == 'E') ? 8 : 4;
-  if ($resolution > $res_limit ) {
+  $resolution = 60;
+  $res_limit = ($quadrant == 'E') ? 15 : 7.5;
+  while ($resolution > $res_limit) {
     $alpha = ['A', 'B', 'C', 'D'];
 
     $lat_min_new_SE = $lat_min - ($lat_min > $resolution) * $resolution;
     $lon_min_new_SE = $lon_min - ($lon_min > $resolution) * $resolution;
+
     $letter = (($lat_min_new_SE < ($resolution / 2)) * 2) + (($lon_min_new_SE < ($resolution / 2)));
 
     $resolution = $resolution / 2;
     $cell .= $alpha[$letter];
-    $cell = resolveCellGrid($lat_min_new_SE, $lon_min_new_SE, $resolution, $quadrant, $cell);
   }
   return($cell);
 }

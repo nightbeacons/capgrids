@@ -7,7 +7,7 @@
 #
 ################################################################
 error_reporting(1);
-include_once("includes/gridFunctions.php");
+include_once($_SERVER['DOCUMENT_ROOT'] . "/includes/gridFunctions.php");
 
 global $mapType;
 
@@ -25,9 +25,15 @@ $onload="";
 
 $abbrev=$coordinates[$sectional]['Abbrev'];
 
+// Change the etag only when this file or gridFunctions.php is updated
+$etag = md5(filemtime($_SERVER['SCRIPT_FILENAME']) + filemtime($_SERVER['DOCUMENT_ROOT'] . "/includes/gridFunctions.php"));
+$etag = 'etag: "' . $etag . '"';
+header("Cache-Control: no-cache");  // https://stackoverflow.com/questions/55025948/does-the-etag-header-make-the-cache-control-header-obsolete-how-to-make-sure-ca
+header($etag);
+
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 <title><?php echo "$abbrev $selectedGrid"; ?> </title>
@@ -80,8 +86,7 @@ echo $my_css;
         echo "<body $onload>\n";
         }
 //  Screen Display Below //
-//phpinfo();
-
+// echo "ETAG=$etag<br>\n";
 $showPrintVersion=0;
 if (!$showPrintVersion) {
 
@@ -155,7 +160,7 @@ $CTwilight = GetCivilTwilight($avgLat, $avgLon);
 
 echo "<br><table border=\"1\" cellspacing=\"0\" cellpadding=\"10\" width=\"375\" align=\"center\" style=\"border-width:10px;border-style:solid;border-color:#c0c0c0;\"><tr><td><table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\" align=\"center\">
 <tr><td width=\"$cellWidth\" valign=\"bottom\" align=\"right\" class=\"coord\">" . $result['NW']['lat'] . "<br>" . $result['NW']['lon'] . "</td><td width=\"($cellWidth + 75)\">&nbsp;</td><td valign=\"bottom\" align=\"left\" width=\"$cellWidth\" class=\"coord\">" . $result['NE']['lat'] . "<br>" . $result['NE']['lon'] . "</td></tr>
-<tr><td>&nbsp;</td><td align=\"center\" valign=\"middle\" style=\"border-width:2px;border-style:solid;width:" . $cellWidth . "px;height:80px;background-color:#f0f0f0;\">" . $coordinates[$sectional]['Abbrev'] . "<br>$selectedGrid $displayQuadrant<br><small><i>Cell: $cell</i></small><img src=\"/images/spacer.gif\" style=\"width:" . $cellWidth . "px;height:1px;\"></td><td width=\"$cellWidth\">&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td align=\"center\" valign=\"middle\" style=\"border-width:2px;border-style:solid;width:" . $cellWidth . "px;height:80px;background-color:#f0f0f0;\">" . $coordinates[$sectional]['Abbrev'] . "<br>$selectedGrid $displayQuadrant<br><small><i>Cell: $cell</i></small><img src=\"/images/spacer.gif\" style=\"width:" . $cellWidth . "px;height:1px;\" alt=\"\"></td><td width=\"$cellWidth\">&nbsp;</td></tr>
 <tr><td valign=\"top\" align=\"right\" class=\"coord\">" . $result['SW']['lat'] . "<br>" . $result['SW']['lon'] . "</td><td align=\"center\" valign=\"top\" class=\"coord\"><nobr><small><i>Mag Variation:</i></small></nobr><br><nobr><i>$variation&deg; $varDir</i></nobr></td><td valign=\"top\" align=\"left\" class=\"coord\">" . $result['SE']['lat'] . "<br>" . $result['SE']['lon'] . "</td></tr>
 </table></td></tr></table></div>\n";
 
