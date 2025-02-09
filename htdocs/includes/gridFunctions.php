@@ -198,6 +198,7 @@ reset($coordinates);
 $gridCounter=$lonCounter=$latCounter = 0;
 $quadrant=-1;
 $found=0;
+if ($latitude == intval($latitude)) {$latitude += 0.000001;} 
 
 	# Determine the Sectional Chart
 	 
@@ -808,4 +809,57 @@ function grid2cell($sectional, $gridNum, $quadrant = "E") {
   }
   return($cell);
 }
+
+
+/**
+ * cell2grid($cell)
+ * Accept a cell string
+ * Return a grid identifier array.
+ */
+function cell2grid($cell) {
+  $cell = trim($cell);
+  $lat_deg = substr($cell, 0, 2) + 0;
+  // Assume all W lon are positive vals.
+  $lon_deg = substr($cell, 2, 3) + 0;
+  $se_corner = ['lat' => $lat_deg, 'lon' => $lon_deg];
+
+  // Trim all ints from left side.
+  $alphas = ltrim($cell, "\x30..\x39");
+
+  $translation = 30;
+  for ($i = 0; $i < strlen($alphas); $i++) {
+    $j = substr($alphas, $i, 1);
+    $factor = $translation / 60;
+    switch ($j) {
+      case "A":
+        $se_corner['lat'] += $factor;
+        $se_corner['lon'] += $factor;
+        break;
+
+      case "B":
+        $se_corner['lat'] += $factor;
+        break;
+
+      case "C":
+        $se_corner['lon'] += $factor;
+        break;
+
+      // Case "D":
+      // Do nothing.
+    }
+    $translation = $translation / 2;
+  }
+
+  // Move lon/lat to the center of the grid ref.
+  $se_corner['lat'] += ($translation / 60);
+  $se_corner['lon'] += ($translation / 60);
+  $se_corner['lon'] = -$se_corner['lon'];
+  $gridAry = lonlat2grid($se_corner['lon'], $se_corner['lat']);
+  if (strlen($alphas) == 2) {
+    $gridAry['quadrant'] = "E";
+  }
+  return($gridAry);
+}
+
+
 ?>
