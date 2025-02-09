@@ -814,7 +814,14 @@ function grid2cell($sectional, $gridNum, $quadrant = "E") {
 /**
  * cell2grid($cell)
  * Accept a cell string
- * Return a grid identifier array.
+ * Return a grid identifier array of the form:
+ * (
+ *   [sectional] => MIAMI
+ *   [abbreviation] => MIA
+ *   [grid] => 176
+ *   [quadrant] => E
+ * )
+ *
  */
 function cell2grid($cell) {
   $cell = trim($cell);
