@@ -799,8 +799,8 @@ function grid2cell($sectional, $gridNum, $quadrant = "E") {
   while ($resolution > $res_limit) {
     $alpha = ['A', 'B', 'C', 'D'];
 
-    $lat_min_new_SE = $lat_min - ($lat_min > $resolution) * $resolution;
-    $lon_min_new_SE = $lon_min - ($lon_min > $resolution) * $resolution;
+    $lat_min_new_SE = $lat_min - ($lat_min >= $resolution) * $resolution;
+    $lon_min_new_SE = $lon_min - ($lon_min >= $resolution) * $resolution;
 
     $letter = (($lat_min_new_SE < ($resolution / 2)) * 2) + (($lon_min_new_SE < ($resolution / 2)));
 
