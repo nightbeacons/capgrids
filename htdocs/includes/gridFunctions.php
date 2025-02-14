@@ -468,7 +468,7 @@ $quadrant  = $latlonAry['quadrant'];
 
   $logfile = $_SERVER['DOCUMENT_ROOT'] . "/logs/lonlat.log";
   $fh = fopen($logfile, "a");
-  $record = "----------\n" . date() . "\ngeolocationURL = $geolocationURL\n";
+  $record = "----------\n" . date(DATE_RFC7231) . "\ngeolocationURL = $geolocationURL\n";
   $record .= "Return value from geolocationURL = " . print_r($output, TRUE);
   $record .= "Lat = " . $latitude . "\tLon = " . $longitude . "\tSectional = " . $sectional . "\n";
   $record .= "Grid = $grid \tQuadrant = $quadrant\n";
@@ -771,12 +771,12 @@ return($twilight);
 
 
 /**
- * Grid2cell($sectional, $gridNum, $quadrant = "E")
+ * Function grid2cell($sectional, $gridNum, $quadrant = "E")
  *  Accepts:
  *    - Full sectional name (i.e. "SEATTLE")
  *    - Grid number
  *    - Quadrant (A/B/C/D or use "E" for Entire grid)
- *  Return the alphabetic (suffix) portion of the cell grid identifier.
+ *  Return the cell grid identifier.
  */
 function grid2cell($sectional, $gridNum, $quadrant = "E") {
   $alpha = ['A', 'B', 'C', 'D'];
@@ -794,18 +794,18 @@ function grid2cell($sectional, $gridNum, $quadrant = "E") {
   // Example: "48093".
   $cell = $lat_deg . sprintf('%03d', $lon_deg);
 
-  $resolution = 60;
+  $grid_size = 60;
   $res_limit = ($quadrant == 'E') ? 15 : 7.5;
-  while ($resolution > $res_limit) {
-    $alpha = ['A', 'B', 'C', 'D'];
 
-    $lat_min_new_SE = $lat_min - ($lat_min >= $resolution) * $resolution;
-    $lon_min_new_SE = $lon_min - ($lon_min >= $resolution) * $resolution;
-
-    $letter = (($lat_min_new_SE < ($resolution / 2)) * 2) + (($lon_min_new_SE < ($resolution / 2)));
-
-    $resolution = $resolution / 2;
+  while ($grid_size > $res_limit) {
+    // Reduce the grid dimensions by 50%.
+    $grid_size = $grid_size / 2;
+    $letter = (($lat_min < ($grid_size)) * 2) + (($lon_min < ($grid_size)));
     $cell .= $alpha[$letter];
+
+    // Translate the lat/lon (minutes) to the SE quadrant of the reduced grid.
+    $lat_min = $lat_min - ($lat_min >= $grid_size) * $grid_size;
+    $lon_min = $lon_min - ($lon_min >= $grid_size) * $grid_size;
   }
   return($cell);
 }
