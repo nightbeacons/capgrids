@@ -2,4 +2,4 @@
 <center><hr></center>
 </td></tr>
 </table>  --> 
-<div class="header_image" style="width:849px;margin:0;"><a href="/"><img style="width:849;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg"></a><hr></div>
+<div class="header_image" style="width:849px;margin:0;"><a href="/"><img style="width:849;height:201; border-style:none; margin:0;" height="201" border="0" src="/images/banner.jpg" alt=""></a><hr></div>
