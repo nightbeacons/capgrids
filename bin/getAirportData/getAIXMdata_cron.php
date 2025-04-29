@@ -65,6 +65,8 @@ $today = date('Y-m-d');
   $query = "OPTIMIZE TABLE " . strtolower($data_file);
   $try = $db->query($query);
 
+// Update X-Plane CIFP data
+  $tmp=`/var/www/capgrids/bin/xplane_earth_424/xplane_earth_424.php`;
   }
  
   if (!$DEVMODE){
