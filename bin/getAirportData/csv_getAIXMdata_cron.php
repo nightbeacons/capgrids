@@ -6,100 +6,60 @@
  /bin/dos2unix *.csv
 
    LOAD DATA INFILE '/var/www/capgrids/bin/getAirportData/AIXM_CSV_ORG/CSV_Data/ATC_ATIS.csv'
-	REPLACE
+    REPLACE
      INTO TABLE ATC_ATIS  
      FIELDS TERMINATED BY ','
      ENCLOSED BY '"'
      LINES TERMINATED BY '\n'
-	 IGNORE 1 LINES;	 
+     IGNORE 1 LINES;     
+ */
+$DEBUG=TRUE;
 
-*/
+ini_set('auto_detect_line_endings', true);
 
-ini_set('auto_detect_line_endings', TRUE);
+// Location for the downloaded AIXM data
+$workDir = "/tmp/aixm/";
 
-include_once "/var/www/capgrids/pwf/aixm_csv.php";
+require_once "/var/www/capgrids/pwf/aixm_csv.php";
 //include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_apt.php";
 //include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_fix.php";
 //include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_nav.php";
 //include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_ils.php";
 
-$DEBUG=TRUE;
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
-
-// DB table names are lc versions of filenames
-//  Exception: the db 'rwy' is derived from the APT.txt file
-$files_to_process = array('APT', 'NAV', 'FIX', 'ILS');
-$files_to_process = file(getcwd() . "/includes/list_of_csv_files.txt");
-// $files_to_process = array('ILS');
-print_r($files_to_process);
-
-$oneFile="FIX_BASE.csv";
-$status = processCsvFile($oneFile);
-echo "STATUS=$status\n";
-die;
-
-$workDir = "/tmp/aixm/";
-   if (!is_dir($workDir)){
-   mkdir($workDir);
-   }
-
-$nextFile = $workDir . "nextEdition.txt";
-$nextDate = file_get_contents($nextFile);
-$today = date('Y-m-d');
-
-// If the "Next Edition Date" is today 
-//  (or in the past)
-// then fetch the new files
-  if (($today >= $nextDate) OR (!file_exists($nextFile)) OR $DEVMODE){
-
-    if (mysqli_connect_errno()){
+if (mysqli_connect_errno()) {
     printf("Connection failed: %s\n", mysqli_connect_error());
     exit();
-    }
-  $result = downloadLatestZipfile($workDir);
+}
 
-  foreach($files_to_process as $data_file){
-  $file = $workDir . $data_file . ".txt";
+// If the workDir does not exist, make it
+if (!is_dir($workDir)) {
+    mkdir($workDir);
+}
 
-     if (!file_exists($file)){
-     die("Could not find $data_file file. Exiting");
-     }
+// Check to see if it's time to download and process a new zipfile
+// If so, download and extract it.
+$result = doWeNeedUpdatedZipfile($workDir, $DEBUG);
 
-  switch($data_file){
-    case "APT":
-      $result = parseAptFile($file);
-      $result = parseAptFileForRwy($file);
-      break;
+if ($result['status'] != "skipped") {
+    // DB table names are lc versions of filenames
+    //  Exception: the db 'rwy' is derived from the APT.txt file
+    $files_to_process = array('APT', 'NAV', 'FIX', 'ILS');
+    $files_to_process = file(getcwd() . "/includes/list_of_csv_files.txt");
+    print_r($files_to_process);
 
-    case "NAV":
-      $result = parseNavFile($file);
-      break;
+    $oneFile="FIX_BASE.csv";
+    $status = processCsvFile($oneFile);
+    echo "STATUS=$status\n";
 
-    case "FIX":
-      $result = parseFixFile($file);
-      break;
+}
 
-    case "ILS":
-      $result = parseIlsFile($file);
-      break;
-  }
 
-  $query = "OPTIMIZE TABLE " . strtolower($data_file);
-  $try = $db->query($query);
+die;
 
-// Update X-Plane CIFP data
-//  $tmp=`/var/www/capgrids/bin/xplane_earth_424/xplane_earth_424.php`;
-  }
- 
-  if (!$DEVMODE){
-    writeIncludeFile();
-    writeNextEditionDate($nextFile);
-  }
-  mysqli_close($db);
 
-  }
-
+mysqli_close($db);
 
 
 
@@ -110,14 +70,15 @@ $today = date('Y-m-d');
  *   Return: Decimal latitude or longitude.
  *         W longitude and S latitude are negative vals
  */
-function convertToDecimalDegrees($dash_formatted) {
-  $finalChar = substr(trim($dash_formatted), -1);
-  $degAry = explode("-", $dash_formatted);
-  $decimalVal = $degAry[0] + $degAry[1] / 60 + (rtrim($degAry[2], 'A..Z')) / 3600;
-  if ($finalChar == 'W' or $finalChar == 'S') {
-    $decimalVal = -($decimalVal);
-  }
-  return($decimalVal);
+function convertToDecimalDegrees($dash_formatted)
+{
+    $finalChar = substr(trim($dash_formatted), -1);
+    $degAry = explode("-", $dash_formatted);
+    $decimalVal = $degAry[0] + $degAry[1] / 60 + (rtrim($degAry[2], 'A..Z')) / 3600;
+    if ($finalChar == 'W' or $finalChar == 'S') {
+        $decimalVal = -($decimalVal);
+    }
+    return($decimalVal);
 }
 
 /**
@@ -126,93 +87,110 @@ function convertToDecimalDegrees($dash_formatted) {
  *
  *  See https://app.swaggerhub.com/apis/FAA/APRA/ (28 Day Subscription) for API details
  */
+function downloadLatestZipfile($workDir, $DEBUG)
+{
+    //$landingPageUrl="https://nfdc.faa.gov/xwiki/bin/view/NFDC/28+Day+NASR+Subscription";
+    //$landingPageUrl="https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/";
+    $apiUrl = "https://external-api.faa.gov/apra/nfdc/nasr/chart?edition=current";
+    echo "Fetching date of next relese . . . \n";
 
-function downloadLatestZipfile($workDir){
-//$landingPageUrl="https://nfdc.faa.gov/xwiki/bin/view/NFDC/28+Day+NASR+Subscription";
-//$landingPageUrl="https://www.faa.gov/air_traffic/flight_info/aeronav/aero_data/NASR_Subscription/";
-$apiUrl = "https://external-api.faa.gov/apra/nfdc/nasr/chart?edition=current";
-echo "Fetching data . . . \n";
-
-$zipFileName = "aixmData.zip";
-$retval = 0;
-$errors = "";
-$result = fetchUrl($apiUrl);
-   if (strpos($result['error'], "client certificate not found") > 1){
-   $result['error']="";
-   }
-   if (strlen($result['error']) < 1){
-   $info = json_decode($result['result']);
+    $zipFileName = "aixmData.zip";
+    $retval = 0;
+    $errors = "";
+    $result = fetchUrl($apiUrl);
+    if (strpos($result['error'], "client certificate not found") > 1) {
+        $result['error']="";
+    }
+    if (strlen($result['error']) < 1) {
+        $info = json_decode($result['result']);
          print_r($info);
 
-   $editionDate = $info->edition[0]->editionDate; 
-   $zipFileUrl = $info->edition[0]->product->url;
-   $zipFileDest = $workDir . $zipFileName;
-echo "Fetching $zipFileUrl\n";
+        $editionDate = $info->edition[0]->editionDate; 
+        $zipFileUrl = $info->edition[0]->product->url;
+        $zipFileDest = $workDir . $zipFileName;
+        echo "Fetching $zipFileUrl\n";
 
-   $zipFileGet = fetchUrl($zipFileUrl, $zipFileDest);
-   $retval=$zipFileGet['result'] + 0;
-      if (strlen($zipFileGet['error']) > 0){
-      $errors .= "Error fetching $zipFileUrl: " . $zipFileGet['error'] . "\n";
-      }
-   }else{
-   $errors .= "Error fetching $zipFileUrl: " . $result['error'] . "\n";
-   }
-   $result = array(
+        $zipFileGet = fetchUrl($zipFileUrl, $zipFileDest);
+        $retval=$zipFileGet['result'] + 0;
+        if (strlen($zipFileGet['error']) > 0) {
+            $errors .= "Error fetching $zipFileUrl: " . $zipFileGet['error'] . "\n";
+        }
+    }else{
+        $errors .= "Error fetching $zipFileUrl: " . $result['error'] . "\n";
+    }
+    $result = array(
                 "status"  => $retval,
                 "error"   => $errors,
                 "edition" => $editionDate,
                 "zipfile" => $zipFileDest
              );
 
-      if ($retval > 0){
-      echo "Unzipping $zipFileDest to $workDir \n";
-      $unpack = "/usr/bin/unzip -o $zipFileDest -d $workDir && /bin/rm $zipFileDest";
-      $cmdResult = `$unpack`;
-      echo "Result of unzip is $cmdResult\n";
-      }
+    if ($retval > 0) {
+        echo "Unzipping $zipFileDest to $workDir \n";
+        $unpack = "/usr/bin/unzip -o $zipFileDest -d $workDir && /bin/rm $zipFileDest";
+        $cmdResult = `$unpack`;
+        echo "Result of unzip is $cmdResult\n";
+        $CSV_dir = "/tmp/aixm/CSV_Data/";
+        $CSVfile = $CSV_dir . (array_values(array_diff(scandir($CSV_dir), array('..', '.'))))[0];
+        echo "Unzipping $CSVfile\n";
+        $result['csvdir'] = $CSV_dir;
+        $unpack1 = "/usr/bin/unzip -o $CSVfile -d $CSV_dir";
+        $cmdResult = `$unpack1`;
+        echo "Fixing line endings of CSV files\n";
+        $fixLE = "/bin/dos2unix -q " . $CSV_dir . "*.csv";
+        $cmdResult = `$fixLE`;
+        echo "Result of unzip is $cmdResult\n";
+           if (!$DEBUG){
+           $removeZips = "/bin/rm -f $CSV_dir/*.zip";
+           $cmdResult = `$removeZips`;
+           }
+    }
 
-return($result);
+    return($result);
 }
 
 
 /**
  * Fetch URL
  */
-function fetchUrl($url, $downloadFile=""){
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $url);
-curl_setopt($ch, CURLOPT_POST, FALSE);
-curl_setopt($ch, CURLOPT_HTTPGET, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
-curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-curl_setopt($ch, CURLOPT_BINARYTRANSFER, TRUE);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-curl_setopt($ch, CURLOPT_FORBID_REUSE, TRUE);
-curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE);
-curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
-   if (strlen($downloadFile) > 1){
-   $fp = fopen($downloadFile, 'w');
-   curl_setopt($ch, CURLOPT_FILE, $fp);
-   } else {
-   curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'accept: application/json'
-    ));
-   }
+function fetchUrl($url, $downloadFile="")
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, false);
+    curl_setopt($ch, CURLOPT_HTTPGET, 1);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
+    curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36");
+    if (strlen($downloadFile) > 1) {
+        $fp = fopen($downloadFile, 'w');
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+    } else {
+        curl_setopt(
+            $ch, CURLOPT_HTTPHEADER, array(
+            'accept: application/json'
+            )
+        );
+    }
 
-$result = curl_exec($ch);
-$curlError = trim(curl_error($ch));
-curl_close($ch);
+    $result = curl_exec($ch);
+    $curlError = trim(curl_error($ch));
+    curl_close($ch);
 
-$retval = array(
+    $retval = array(
                 'result' => $result,
                 'error'  => $curlError
           );
-   if (strlen($downloadFile) > 1){
-   fclose($fp);
-   }
-return($retval);
+    if (strlen($downloadFile) > 1) {
+        fclose($fp);
+    }
+    return($retval);
 }
 
 
@@ -223,18 +201,18 @@ return($retval);
  */
 function writeIncludeFile()
 {
-$includeFile = "/var/www/capgrids/htdocs/includes/lastMod.php";
-$readmeFile = "/tmp/aixm/README.txt";
-$readme = file_get_contents($readmeFile);
+    $includeFile = "/var/www/capgrids/htdocs/includes/lastMod.php";
+    $readmeFile = "/tmp/aixm/README.txt";
+    $readme = file_get_contents($readmeFile);
 
-$p = preg_match("/AIS subscriber files effective date.*[\.\$]/m", $readme, $matches);
-$effDate = trim(preg_replace("/AIS subscriber files effective date/", "", $matches[0]), " .");
-$etag = md5($effDate);
-$currentCycle = trim(date('ym', strtotime($effDate)));
+    $p = preg_match("/AIS subscriber files effective date.*[\.\$]/m", $readme, $matches);
+    $effDate = trim(preg_replace("/AIS subscriber files effective date/", "", $matches[0]), " .");
+    $etag = md5($effDate);
+    $currentCycle = trim(date('ym', strtotime($effDate)));
 
-$fh = fopen($includeFile, "w");
-fwrite($fh, "<?php\n\$dataLastModified = \"$effDate\";\n\$airportDataEtag = \"$etag\";\n\$currentCycle = \"$currentCycle\";\n");
-fclose($fh);
+    $fh = fopen($includeFile, "w");
+    fwrite($fh, "<?php\n\$dataLastModified = \"$effDate\";\n\$airportDataEtag = \"$etag\";\n\$currentCycle = \"$currentCycle\";\n");
+    fclose($fh);
 }
 
 
@@ -243,30 +221,54 @@ fclose($fh);
  */
 function writeNextEditionDate($nextFile)
 {
-$nextUrl = "https://external-api.faa.gov/apra/nfdc/nasr/info?edition=next";
-$result = fetchUrl($nextUrl);
-   if (strpos($result['error'], "client certificate not found") > 1){
-   $result['error']="";
-   }
-   if (strlen($result['error']) < 1){
-   $info = json_decode($result['result']);
-   //      print_r($info);
+    $nextUrl = "https://external-api.faa.gov/apra/nfdc/nasr/info?edition=next";
+    $result = fetchUrl($nextUrl);
+    if (strpos($result['error'], "client certificate not found") > 1) {
+        $result['error']="";
+    }
+    if (strlen($result['error']) < 1) {
+        $info = json_decode($result['result']);
+        //      print_r($info);
 
-   $editionDateObj = date_create_from_format('m/d/Y', $info->edition[0]->editionDate);
-   $editionDate = date_format($editionDateObj, 'Y-m-d');
-   }
-file_put_contents($nextFile, $editionDate);
-//echo "NEXT IS |" . $editionDate . "|\n\n";
+        $editionDateObj = date_create_from_format('m/d/Y', $info->edition[0]->editionDate);
+        $editionDate = date_format($editionDateObj, 'Y-m-d');
+    }
+    file_put_contents($nextFile, $editionDate);
+    //echo "NEXT IS |" . $editionDate . "|\n\n";
 }
 
+/**
+ * Check to see if we need to download a new zipfile
+ *  If so, download and return TRUE
+ *  Otherwise, skip and return FALSE
+ */
+function doWeNeedUpdatedZipfile($workDir, $DEBUG)
+{
+    $result = array(
+               "status" => "skipped",
+               );
+    $nextFile = $workDir . "nextEdition.txt";
+    $nextDate = file_get_contents($nextFile);
+    $today = date('Y-m-d');
 
-function processCsvFile($oneFile){
-$filespec = getcwd() . "/includes/" . $oneFile;
-$parts = pathinfo($oneFile);
-$db_table = $parts['filename'];
-echo "$db_table\n";
+    // If the "Next Edition Date" is today
+    //  (or in the past) or if DEBUG==TRUE
+    // then fetch the new files
+    if (($today >= $nextDate) OR (!file_exists($nextFile)) OR $DEBUG) {
 
+        $result = downloadLatestZipfile($workDir, $DEBUG);
+        writeIncludeFile();
+        writeNextEditionDate($nextFile);
+    }
+    return($result);
+}
 
+function processCsvFile($oneFile)
+{
+    $filespec = getcwd() . "/includes/" . $oneFile;
+    $parts = pathinfo($oneFile);
+    $db_table = $parts['filename'];
+    echo "$db_table\n";
 
 }
 
