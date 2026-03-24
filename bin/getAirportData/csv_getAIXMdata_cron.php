@@ -1,19 +1,7 @@
 #!/usr/bin/php
 <?php
 
-/**
- Load files as follows:
- /bin/dos2unix *.csv
-
-   LOAD DATA INFILE '/var/www/capgrids/bin/getAirportData/AIXM_CSV_ORG/CSV_Data/ATC_ATIS.csv'
-    REPLACE
-     INTO TABLE ATC_ATIS  
-     FIELDS TERMINATED BY ','
-     ENCLOSED BY '"'
-     LINES TERMINATED BY '\n'
-     IGNORE 1 LINES;     
- */
-$DEBUG=TRUE;
+$DEBUG=true;
 
 ini_set('auto_detect_line_endings', true);
 
@@ -21,11 +9,7 @@ ini_set('auto_detect_line_endings', true);
 $workDir = "/tmp/aixm/";
 
 require_once "/var/www/capgrids/pwf/aixm_csv.php";
-//include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_apt.php";
-//include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_fix.php";
-//include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_nav.php";
-//include_once "/var/www/capgrids/bin/getAirportData/aixm_includes/parse_ils.php";
-
+require_once  __DIR__ . "/includes/prepareDbTable.php";
 
 $db = new mysqli($dbserver, $w_dbuser, $w_dbpass, $dbname);
 if (mysqli_connect_errno()) {
@@ -38,25 +22,36 @@ if (!is_dir($workDir)) {
     mkdir($workDir);
 }
 
+$csv_download_dir = $workDir . "CSV_Data/";
+
 // Check to see if it's time to download and process a new zipfile
 // If so, download and extract it.
-$result = doWeNeedUpdatedZipfile($workDir, $DEBUG);
+// // // $result = doWeNeedUpdatedZipfile($workDir, $DEBUG);
 
-if ($result['status'] != "skipped") {
+// // // if ($result['status'] != "skipped") {
     // DB table names are lc versions of filenames
     //  Exception: the db 'rwy' is derived from the APT.txt file
-    $files_to_process = array('APT', 'NAV', 'FIX', 'ILS');
     $files_to_process = file(getcwd() . "/includes/list_of_csv_files.txt");
+    if ($DEBUG){
     print_r($files_to_process);
-
-    $oneFile="FIX_BASE.csv";
-    $status = processCsvFile($oneFile);
-    echo "STATUS=$status\n";
-
+    }
+clearstatcache(); 
+foreach($files_to_process as $oneFile){
+    // $oneFile="APT_BASE.csv";
+    $full_file_spec = trim($csv_download_dir . $oneFile);
+    if (is_readable($full_file_spec)) {
+      if ($DEBUG){
+        echo "Processing $full_file_spec . . . \n";
+      }
+        $status = prepareDbTable($oneFile, "preprocess", $db, $dbname, $DEBUG);
+        $status .= processCsvFile($full_file_spec, $db);
+        $status .= prepareDbTable($oneFile, "postprocess", $db, $dbname, $DEBUG);
+    } else {
+        echo "Cannot find $full_file_spec\n";
+    }
 }
+// // // }
 
-
-die;
 
 
 mysqli_close($db);
@@ -140,12 +135,11 @@ function downloadLatestZipfile($workDir, $DEBUG)
         $fixLE = "/bin/dos2unix -q " . $CSV_dir . "*.csv";
         $cmdResult = `$fixLE`;
         echo "Result of unzip is $cmdResult\n";
-           if (!$DEBUG){
-           $removeZips = "/bin/rm -f $CSV_dir/*.zip";
-           $cmdResult = `$removeZips`;
-           }
+        if (!$DEBUG) {
+            $removeZips = "/bin/rm -f $CSV_dir/*.zip";
+            $cmdResult = `$removeZips`;
+        }
     }
-
     return($result);
 }
 
@@ -263,12 +257,27 @@ function doWeNeedUpdatedZipfile($workDir, $DEBUG)
     return($result);
 }
 
-function processCsvFile($oneFile)
+
+
+
+function processCsvFile($fullFileSpec, $db)
 {
-    $filespec = getcwd() . "/includes/" . $oneFile;
-    $parts = pathinfo($oneFile);
+    $parts = pathinfo($fullFileSpec);
     $db_table = $parts['filename'];
-    echo "$db_table\n";
+
+    $query = "LOAD DATA INFILE '" . $fullFileSpec . "'
+     REPLACE
+     INTO TABLE $db_table
+     FIELDS TERMINATED BY ','
+     ENCLOSED BY '\"'
+     LINES TERMINATED BY '\n'
+     IGNORE 1 LINES";
+
+    if (($try = $db->query($query))===false) {
+        printf("Invalid query: %s\nWhole query: %s\n", $db->error, $query);
+           exit();
+    }
+
 
 }
 
